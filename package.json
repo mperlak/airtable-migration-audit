@@ -1,0 +1,18 @@
+{
+  "name": "airtable-discover",
+  "version": "1.0.0",
+  "description": "Discover and analyze Airtable data — fetches schema + all records, computes per-field statistics, generates a data analysis report",
+  "type": "module",
+  "scripts": {
+    "discover": "tsx src/discover.ts",
+    "discover:schema": "tsx src/discover.ts --schema-only"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
