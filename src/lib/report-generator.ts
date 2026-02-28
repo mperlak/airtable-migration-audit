@@ -68,6 +68,8 @@ export function generateReport(input: ReportInput): string {
 
   appendFlags(lines, flags)
 
+  appendNextSteps(lines, tables, graph, flags)
+
   return lines.join("\n")
 }
 
@@ -486,6 +488,199 @@ function appendFlags(lines: string[], flags: DataQualityFlag[]): void {
     )
   }
 
+  lines.push("")
+}
+
+// ---------------------------------------------------------------------------
+// Next Steps
+// ---------------------------------------------------------------------------
+
+function appendNextSteps(
+  lines: string[],
+  tables: TableAnalysis[],
+  graph: DependencyGraph,
+  flags: DataQualityFlag[]
+): void {
+  lines.push("---")
+  lines.push("")
+  lines.push("## Next Steps")
+  lines.push("")
+
+  // --- Compute metrics ---
+  const tablesWithData = tables.filter((t) => t.recordCount > 0).length
+  const emptyTables = tables.length - tablesWithData
+  const totalRecords = tables.reduce((s, t) => s + t.recordCount, 0)
+
+  const computedCount = tables.reduce(
+    (s, t) => s + t.fields.filter((f) => f.kind === "computed").length,
+    0
+  )
+
+  const dictCandidates = tables.reduce(
+    (s, t) =>
+      s +
+      t.fields.filter(
+        (f): f is TextFieldAnalysis =>
+          f.kind === "text" && f.uniqueCount < 20 && f.totalRecords > 50
+      ).length,
+    0
+  )
+
+  const selectCount = tables.reduce(
+    (s, t) => s + t.fields.filter((f): f is SelectFieldAnalysis => f.kind === "select").length,
+    0
+  )
+
+  const m2oCount = tables.reduce(
+    (s, t) =>
+      s +
+      t.fields.filter(
+        (f): f is LinkedRecordFieldAnalysis => f.kind === "linkedRecord" && f.multipleLinks === 0
+      ).length,
+    0
+  )
+
+  const m2mCount = tables.reduce(
+    (s, t) =>
+      s +
+      t.fields.filter(
+        (f): f is LinkedRecordFieldAnalysis => f.kind === "linkedRecord" && f.multipleLinks > 0
+      ).length,
+    0
+  )
+
+  const attachmentFields = tables.reduce(
+    (s, t) => s + t.fields.filter((f): f is AttachmentFieldAnalysis => f.kind === "attachment").length,
+    0
+  )
+  const totalAttachmentSize = tables.reduce(
+    (s, t) =>
+      s +
+      t.fields
+        .filter((f): f is AttachmentFieldAnalysis => f.kind === "attachment")
+        .reduce((as_, f) => as_ + f.totalSizeBytes, 0),
+    0
+  )
+  const totalAttachmentCount = tables.reduce(
+    (s, t) =>
+      s +
+      t.fields
+        .filter((f): f is AttachmentFieldAnalysis => f.kind === "attachment")
+        .reduce((as_, f) => as_ + f.totalAttachments, 0),
+    0
+  )
+
+  const warningCount = flags.filter((f) => f.severity === "warning").length
+
+  // --- Complexity score ---
+  let score = 0
+  score += m2mCount
+  score += graph.cycles.length
+  score += graph.crossBaseLinks.length
+  if (attachmentFields > 0) score++
+  if (totalRecords > 10000) score++
+  const complexity = score === 0 ? "Low" : score <= 2 ? "Medium" : "High"
+
+  // --- Migration Readiness ---
+  lines.push("### Migration Readiness")
+  lines.push("")
+  lines.push("| Metric | Value |")
+  lines.push("|--------|-------|")
+  lines.push(
+    `| Tables to migrate | ${tables.length} (${tablesWithData} with data, ${emptyTables} empty) |`
+  )
+  lines.push(
+    `| Computed fields (formulas/rollups) | ${computedCount} — must be recreated as app logic |`
+  )
+  lines.push(
+    `| Dictionary candidates | ${dictCandidates} text field${dictCandidates !== 1 ? "s" : ""} → normalize into lookup tables |`
+  )
+  lines.push(
+    `| Select fields | ${selectCount} → convert to enum types or lookup tables |`
+  )
+  lines.push(
+    `| Relationships | ${m2oCount} Many-to-One (FK), ${m2mCount} Many-to-Many (junction tables) |`
+  )
+  lines.push(
+    `| Data quality warnings | ${warningCount} — ${warningCount > 0 ? "fix before migrating" : "none"} |`
+  )
+  lines.push(`| Circular dependencies | ${graph.cycles.length} |`)
+  lines.push(`| Cross-base links | ${graph.crossBaseLinks.length} |`)
+  lines.push(`| **Estimated complexity** | **${complexity}** |`)
+  lines.push("")
+
+  // --- Recommended Target Schema ---
+  const lookupTables = tables.reduce(
+    (s, t) =>
+      s +
+      t.fields.filter(
+        (f): f is SelectFieldAnalysis => f.kind === "select" && f.definedChoices.length >= 4
+      ).length,
+    0
+  )
+  const totalEstimatedTables = tablesWithData + m2mCount + lookupTables
+
+  lines.push("### Recommended Target Schema")
+  lines.push("")
+  lines.push("Your Airtable structure maps to approximately:")
+  lines.push("")
+  lines.push(
+    `- **${tablesWithData}** core PostgreSQL tables (from Airtable tables with data)`
+  )
+  if (m2mCount > 0) {
+    lines.push(`- **${m2mCount}** junction tables (for Many-to-Many relationships)`)
+  }
+  if (lookupTables > 0) {
+    lines.push(`- **${lookupTables}** lookup tables (from select fields with 4+ choices)`)
+  }
+  lines.push(
+    `- **${totalEstimatedTables}** total tables, **${m2oCount}** foreign key relationships`
+  )
+  lines.push("")
+
+  // --- How to Proceed ---
+  lines.push("### How to Proceed")
+  lines.push("")
+  let step = 1
+  if (warningCount > 0) {
+    lines.push(
+      `${step}. **Fix data quality issues** — resolve the ${warningCount} warning${warningCount !== 1 ? "s" : ""} flagged above`
+    )
+    step++
+  }
+  lines.push(
+    `${step}. **Design target schema** — use the import order and relationship analysis as your starting point`
+  )
+  step++
+  if (computedCount > 0) {
+    lines.push(
+      `${step}. **Handle computed fields** — the ${computedCount} formula/rollup/lookup field${computedCount !== 1 ? "s" : ""} must be recreated as application logic or database views`
+    )
+    step++
+  }
+  if (dictCandidates > 0) {
+    lines.push(
+      `${step}. **Normalize dictionaries** — the ${dictCandidates} dictionary-candidate text field${dictCandidates !== 1 ? "s" : ""} should become lookup tables`
+    )
+    step++
+  }
+  if (attachmentFields > 0) {
+    lines.push(
+      `${step}. **Plan attachment migration** — ${fmt(totalAttachmentCount)} files (~${formatSize(totalAttachmentSize)}) need a file storage solution (S3, Cloudflare R2, etc.)`
+    )
+    step++
+  }
+  lines.push(
+    `${step}. **Import in dependency order** — follow the import order table above to maintain referential integrity`
+  )
+  lines.push("")
+
+  // --- Attribution ---
+  lines.push("---")
+  lines.push("")
+  lines.push(
+    "*This report was generated by [airtable-discover](https://github.com/mperlak/airtable-discover) — a free, open-source Airtable migration analysis tool. Built by the creator of [Straktur](https://straktur.com), a Next.js boilerplate for internal business apps.*"
+  )
   lines.push("")
 }
 
