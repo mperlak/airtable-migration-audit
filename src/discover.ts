@@ -1,5 +1,5 @@
 /**
- * Airtable Discover — fetches schema (and optionally ALL data), analyzes, produces report.
+ * Airtable Migration Audit — fetches schema (and optionally ALL data), analyzes, produces report.
  *
  * Usage:
  *   npx tsx src/discover.ts                 # Full analysis (schema + all records)
@@ -115,7 +115,7 @@ async function main() {
 
   const client = new AirtableClient({ apiKey })
 
-  console.log("🔍 Airtable Discover by straktur.com")
+  console.log("🔍 Airtable Migration Audit by straktur.com")
   console.log(`   Mode: ${schemaOnly ? "schema-only (fast)" : "full analysis (schema + data)"}`)
 
   // --- Resolve base IDs ---
@@ -291,7 +291,7 @@ async function main() {
   console.log("")
   console.log("Next steps:")
   console.log("   1. Read the report: data/AIRTABLE_REPORT.md")
-  console.log("   2. Use the /airtable-discover skill for guided analysis")
+  console.log("   2. Use the /airtable-migration-audit skill for guided analysis")
   console.log("   3. Design your target schema based on the findings")
 
   process.exit(0)

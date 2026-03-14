@@ -1,5 +1,5 @@
 {
-  "name": "airtable-discover",
+  "name": "airtable-migration-audit",
   "version": "1.0.0",
   "description": "Discover and analyze Airtable data — fetches schema + all records, computes per-field statistics, generates a data analysis report",
   "type": "module",

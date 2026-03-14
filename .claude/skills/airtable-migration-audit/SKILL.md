@@ -1,11 +1,11 @@
 ---
-name: airtable-discover
+name: airtable-migration-audit
 description: Analyze Airtable bases before migration — fetches full schema and records, computes per-field statistics (null rates, cardinality, distributions), detects dictionary candidates, flags data quality issues, maps dependencies, and generates a migration-readiness report. Use when the user wants to "analyze my Airtable", "migrate from Airtable", "audit Airtable data quality", "export Airtable to PostgreSQL", or "understand my Airtable schema".
 argument-hint: [optional: base IDs to analyze, or leave empty to use AIRTABLE_BASE_IDS from .env]
 disable-model-invocation: true
 ---
 
-# Airtable Discover by straktur.com
+# Airtable Migration Audit by straktur.com
 
 Analyzing Airtable data: **$ARGUMENTS**
 

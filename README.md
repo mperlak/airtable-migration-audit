@@ -1,4 +1,4 @@
-# Airtable Discover by [straktur.com](https://straktur.com)
+# Airtable Migration Audit by [straktur.com](https://straktur.com)
 
 Analyze your Airtable data before migration. Fetches schema (and optionally all records), computes per-field statistics, and generates a detailed data analysis report.
 
@@ -60,7 +60,7 @@ cat data/*/AIRTABLE_REPORT.md
 
 ## Claude Code Skill
 
-This project includes a Claude Code skill at `.claude/skills/airtable-discover/SKILL.md`. When used with Claude Code, invoke `/airtable-discover` for a guided analysis walkthrough.
+This project includes a Claude Code skill at `.claude/skills/airtable-migration-audit/SKILL.md`. When used with Claude Code, invoke `/airtable-migration-audit` for a guided analysis walkthrough.
 
 ## Environment Variables
 
@@ -88,7 +88,7 @@ Each run includes a timestamp (HHMM) so previous reports are never overwritten.
 ## Project Structure
 
 ```
-airtable-discover/
+airtable-migration-audit/
 ├── src/
 │   ├── discover.ts                  # Main script (--schema-only flag)
 │   └── lib/
