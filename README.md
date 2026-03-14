@@ -62,6 +62,7 @@ cat data/*/AIRTABLE_REPORT.md
 - Relationship cardinality analysis (Many-to-One vs Many-to-Many from actual data)
 - Dictionary candidate detection (fields with few unique values)
 - Data quality flags (long text, unused choices, high nullity)
+- **`MIGRATION.json`** — machine-consumable migration spec (see below)
 
 ## Claude Code Skill
 
@@ -90,12 +91,64 @@ data/
   2025-01-15_0930_appXXX_appYYY/
     AIRTABLE_REPORT.md     # Markdown report (for agents / CLI)
     AIRTABLE_REPORT.html   # Interactive HTML report (open in browser)
+    MIGRATION.json         # Structured migration spec (full mode only)
     raw-schema.json        # Raw Airtable schema
   2025-01-15_1415_appXXX_appYYY/
     ...
 ```
 
 Each run includes a timestamp (HHMM) so previous reports are never overwritten. The HTML report is a single self-contained file with dark/light mode, collapsible sections, and sidebar navigation — no external dependencies.
+
+### MIGRATION.json
+
+Generated in **full mode only** (requires record data for cardinality and validation analysis). This file is a structured, machine-consumable migration specification designed to be consumed by scaffolding agents — for example, the [Straktur](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=readme-migration-json) migration agent that auto-generates Drizzle schemas, Zod validation, dictionary seeds, and feature modules.
+
+The JSON contains:
+
+- **Tables** — each with a proposed `dbTableName` (mechanical snake_case, no translation), record count, and import order
+- **Columns** — Airtable type → Drizzle type mapping (e.g. `singleLineText` → `varchar(150)`, `number` with decimals → `numeric({ precision, scale })`), nullability, and Zod-compatible validation constraints
+- **Relations** — Many-to-One foreign keys derived from linked record cardinality analysis
+- **Junction tables** — auto-generated for Many-to-Many relationships and multi-select fields
+- **Dictionaries** — single/multi-select fields extracted into dictionary reference tables, with all values and usage counts
+- **Computed fields** — formulas, rollups, counts flagged as `recreateAs: "app-logic"`
+- **Skip list** — auto-numbers, system fields (createdBy, lastModifiedTime) that have DB-native equivalents
+- **Import order** — topologically sorted table list respecting foreign key dependencies
+
+Example (abbreviated):
+
+```jsonc
+{
+  "schemaVersion": 1,
+  "tables": [{
+    "airtableName": "Listy zakupów",
+    "dbTableName": "listy_zakupow",
+    "columns": [{
+      "airtableName": "Nazwa",
+      "dbColumnName": "nazwa",
+      "airtableType": "singleLineText",
+      "drizzleType": "varchar(150)",
+      "nullable": false,
+      "validation": { "type": "string", "maxLength": 128 }
+    }],
+    "relations": [{
+      "airtableFieldName": "Projekt",
+      "dbColumnName": "projekt_id",
+      "type": "manyToOne",
+      "targetTable": "projekty"
+    }],
+    "dictionaries": [{
+      "airtableFieldName": "Status",
+      "dbColumnName": "status_id",
+      "dictionaryType": "listy_zakupow_status",
+      "values": [{ "name": "Aktywna", "usageCount": 150 }]
+    }]
+  }],
+  "junctionTables": [{ "dbTableName": "listy_zakupow_to_produkty", "reason": "manyToMany" }],
+  "importOrder": ["producenci", "produkty", "projekty", "listy_zakupow"]
+}
+```
+
+You can feed this file directly to an AI coding agent to scaffold your target application — or use it as a reference for manual schema design.
 
 ## Project Structure
 
@@ -108,6 +161,7 @@ airtable-migration-audit/
 │       ├── data-analyzer.ts         # Per-field statistics (full mode)
 │       ├── schema-report-generator.ts  # Schema-only report
 │       ├── report-generator.ts      # Full analysis report
+│       ├── migration-json-generator.ts # MIGRATION.json output
 │       └── mapping.ts              # AT record ID ↔ target ID persistence
 ├── data/                           # Generated output (gitignored)
 ├── .claude/skills/                 # Claude Code skill definition

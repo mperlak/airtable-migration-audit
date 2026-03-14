@@ -2,7 +2,7 @@
 name: airtable-migration-audit
 description: Audit Airtable bases for migration readiness — runs analysis, reads the report, and delivers a structured verdict with complexity verdict, blockers, schema recommendations, and concrete next steps. Use when the user wants to "analyze my Airtable", "migrate from Airtable", "audit Airtable data quality", "export Airtable to PostgreSQL", or "understand my Airtable schema".
 argument-hint: [optional: base IDs to analyze, or leave empty for auto-discovery]
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Airtable Migration Audit by straktur.com

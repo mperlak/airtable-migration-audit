@@ -12,6 +12,7 @@
  *
  * Output (in data/<date>_<baseIds>/ subfolder):
  *   AIRTABLE_REPORT.md   — Human-readable analysis (full or schema-only)
+ *   MIGRATION.json       — Machine-consumable migration spec (full mode only)
  *   raw-schema.json      — Raw Airtable schema
  */
 
@@ -30,6 +31,7 @@ import { generateReport } from "./lib/report-generator"
 import { generateHtmlReport } from "./lib/html-report-generator"
 import { generateSchemaReport } from "./lib/schema-report-generator"
 import { generateSchemaHtmlReport } from "./lib/schema-html-report-generator"
+import { generateMigrationJson } from "./lib/migration-json-generator"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_ROOT = resolve(__dirname, "..", "data")
@@ -294,6 +296,12 @@ async function main() {
   writeFileSync(htmlPath, htmlReport, "utf-8")
   console.log(`✅ HTML report saved to ${htmlPath}`)
 
+  // --- Migration JSON ---
+  const migrationJson = generateMigrationJson({ bases, tables: tableAnalyses, graph, generatedAt: new Date() })
+  const migrationPath = resolve(DATA_DIR, "MIGRATION.json")
+  writeFileSync(migrationPath, JSON.stringify(migrationJson, null, 2), "utf-8")
+  console.log(`✅ Migration JSON saved to ${migrationPath}`)
+
   // --- Summary ---
   console.log("\n" + "=".repeat(60))
   console.log("📊 Discovery Summary")
@@ -308,6 +316,7 @@ async function main() {
   console.log(`   Report (MD):   ${reportPath}`)
   console.log(`   Report (HTML): ${htmlPath}`)
   console.log(`   Schema (JSON): ${schemaPath}`)
+  console.log(`   Migration:     ${migrationPath}`)
   console.log("")
   console.log("Next steps:")
   console.log("   1. Read the report: data/AIRTABLE_REPORT.md")
