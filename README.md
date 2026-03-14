@@ -18,6 +18,8 @@ Works as a **CLI tool** or as an **AI agent skill** for [Claude Code](https://do
 
 ## Quick Start
 
+Requires [Node.js 18+](https://nodejs.org/) and npm.
+
 ```bash
 git clone https://github.com/mperlak/airtable-migration-audit.git
 cd airtable-migration-audit
