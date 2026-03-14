@@ -4,7 +4,8 @@ Outgrowing Airtable? This tool tells you exactly what it takes to migrate. Point
 
 Works as a **CLI tool** or as a **Claude Code skill** (`/airtable-migration-audit`) that reads the report and delivers a structured verdict.
 
-**Runs locally.** Your Airtable data is fetched directly to your machine using your read-only token, analyzed locally, and written to local report files. Nothing is sent to a Straktur backend or any third-party service. You decide if and with whom you share the results.
+> [!IMPORTANT]
+> **Runs locally.** Your Airtable data is fetched directly to your machine using your read-only token, analyzed locally, and written to local report files. Nothing is sent to a Straktur backend or any third-party service. You decide if and with whom you share the results.
 
 ## Prerequisites
 
