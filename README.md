@@ -27,36 +27,30 @@ cp .env.example .env       # ← set AIRTABLE_API_KEY (required)
 
 Now choose how you want to use it:
 
-### Use as CLI
+**1. Run as CLI:**
 
 ```bash
 npm run discover           # Full analysis — schema + all records (minutes)
 npm run discover:schema    # Fast — schema only (seconds)
-
-# Open data/**/AIRTABLE_REPORT.html in your browser
 ```
 
-### Use as AI Agent Skill
+Open `data/**/AIRTABLE_REPORT.html` in your browser to see the results.
 
-Install the `/airtable-migration-audit` skill — the agent runs the audit, reads the report, and delivers a structured migration verdict.
+**2. Use as AI Agent Skill** — install `/airtable-migration-audit` and the agent runs the audit, reads the report, and delivers a structured migration verdict:
 
-**Claude Code** (plugin):
-```
+```bash
+# Claude Code
 /plugin marketplace add mperlak/airtable-migration-audit
 /plugin install airtable-migration-audit
-```
 
-**OpenAI Codex:**
-```
+# OpenAI Codex
 $skill-installer install https://github.com/mperlak/airtable-migration-audit/tree/main/skills/airtable-migration-audit
-```
 
-**Any agent** ([Agent Skills spec](https://agentskills.io)):
-```bash
+# Any agent (Agent Skills spec — https://agentskills.io)
 npx skills add mperlak/airtable-migration-audit
 ```
 
-Once installed, run `/airtable-migration-audit` in your agent.
+Then run `/airtable-migration-audit` in your agent.
 
 ## Two Modes
 
@@ -107,7 +101,7 @@ data/
 
 Each run includes a timestamp (HHMM) so previous reports are never overwritten. The HTML report is a single self-contained file with dark/light mode, collapsible sections, and sidebar navigation — no external dependencies.
 
-### MIGRATION.json
+### MIGRATION.json — ready-to-use PostgreSQL migration spec
 
 Generated in **full mode only** (requires record data for cardinality and validation analysis). This file is a framework-agnostic, machine-consumable PostgreSQL migration specification. Framework adapters (e.g. [Straktur](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=readme-migration-json), Prisma, Django) consume this file to scaffold target applications.
 
