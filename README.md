@@ -2,17 +2,12 @@
 
 Outgrowing Airtable? This tool tells you exactly what it takes to migrate. Point it at your bases and get a migration-readiness report: complexity verdict, schema recommendations, data quality blockers, and a concrete action plan.
 
-Works as a **CLI tool** or as a **Claude Code skill** (`/airtable-migration-audit`) that reads the report and delivers a structured verdict.
+Works as a **CLI tool** or as an **AI agent skill** for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenAI Codex](https://openai.com/index/codex/), and other coding agents.
 
 <img src="docs/screenshot-html-report.png" alt="HTML Report Preview" width="700">
 
 > [!IMPORTANT]
 > **Runs locally.** Your Airtable data is fetched directly to your machine using your read-only token, analyzed locally, and written to local report files. Nothing is sent to a Straktur backend or any third-party service. You decide if and with whom you share the results.
-
-## Prerequisites
-
-- **Node.js 18+** (uses native `fetch`)
-- **npm**
 
 ## What it audits
 
@@ -24,20 +19,44 @@ Works as a **CLI tool** or as a **Claude Code skill** (`/airtable-migration-audi
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
+git clone https://github.com/mperlak/airtable-migration-audit.git
+cd airtable-migration-audit
 npm install
-
-# 2. Configure
-cp .env.example .env
-# Edit .env — set AIRTABLE_API_KEY (required)
-# Optionally set AIRTABLE_BASE_IDS, or let the tool auto-discover your bases
-
-# 3. Run (choose one)
-npm run discover:schema    # Fast — schema only (seconds)
-npm run discover           # Full — schema + all records (minutes)
-
-# 4. Open data/**/AIRTABLE_REPORT.html in your browser
+cp .env.example .env       # ← set AIRTABLE_API_KEY (required)
 ```
+
+Now choose how you want to use it:
+
+### Use as CLI
+
+```bash
+npm run discover           # Full analysis — schema + all records (minutes)
+npm run discover:schema    # Fast — schema only (seconds)
+
+# Open data/**/AIRTABLE_REPORT.html in your browser
+```
+
+### Use as AI Agent Skill
+
+Install the `/airtable-migration-audit` skill — the agent runs the audit, reads the report, and delivers a structured migration verdict.
+
+**Claude Code** (plugin):
+```
+/plugin marketplace add mperlak/airtable-migration-audit
+/plugin install airtable-migration-audit
+```
+
+**OpenAI Codex:**
+```
+$skill-installer install https://github.com/mperlak/airtable-migration-audit/tree/main/skills/airtable-migration-audit
+```
+
+**Any agent** ([Agent Skills spec](https://agentskills.io)):
+```bash
+npx skills add mperlak/airtable-migration-audit
+```
+
+Once installed, run `/airtable-migration-audit` in your agent.
 
 ## Two Modes
 
@@ -62,43 +81,6 @@ npm run discover           # Full — schema + all records (minutes)
 - Dictionary candidate detection (fields with few unique values)
 - Data quality flags (long text, unused choices, high nullity)
 - **`MIGRATION.json`** — machine-consumable migration spec (see below)
-
-## Install as AI Agent Skill
-
-Install the `/airtable-migration-audit` skill into any project — the agent will run the audit, read the report, and deliver a structured verdict with complexity, blockers, schema recommendation, and next steps.
-
-### Option 1: npx (recommended)
-
-```bash
-npx skills add mperlak/airtable-migration-audit
-```
-
-Works with Claude Code, OpenAI Codex, and any agent that supports the [Agent Skills spec](https://agentskills.io).
-
-### Option 2: Claude Code Plugin
-
-```
-/plugin marketplace add mperlak/airtable-migration-audit
-/plugin install airtable-migration-audit
-```
-
-### Option 3: OpenAI Codex
-
-```
-$skill-installer install https://github.com/mperlak/airtable-migration-audit/tree/main/skills/airtable-migration-audit
-```
-
-### Option 4: Clone and copy
-
-```bash
-git clone https://github.com/mperlak/airtable-migration-audit.git
-# Claude Code
-cp -r airtable-migration-audit/skills/airtable-migration-audit .claude/skills/
-# OpenAI Codex
-cp -r airtable-migration-audit/skills/airtable-migration-audit .agents/skills/
-```
-
-Once installed, run `/airtable-migration-audit` in your agent.
 
 ## Environment Variables
 
