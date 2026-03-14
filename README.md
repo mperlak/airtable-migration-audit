@@ -1,20 +1,22 @@
-# Airtable Migration Audit by [straktur.com](https://straktur.com)
+# Airtable Migration Audit by [straktur.com](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=readme-header)
 
-Analyze your Airtable data before migration. Fetches schema (and optionally all records), computes per-field statistics, and generates a detailed data analysis report.
+Outgrowing Airtable? This tool tells you exactly what it takes to migrate. Point it at your bases and get a migration-readiness report: complexity verdict, schema recommendations, data quality blockers, and a concrete action plan.
+
+Works as a **CLI tool** or as a **Claude Code skill** (`/airtable-migration-audit`) that reads the report and delivers a structured verdict.
+
+**Runs locally.** Your Airtable data is fetched directly to your machine using your read-only token, analyzed locally, and written to local report files. Nothing is sent to a Straktur backend or any third-party service. You decide if and with whom you share the results.
 
 ## Prerequisites
 
 - **Node.js 18+** (uses native `fetch`)
 - **npm**
 
-## What it does
+## What it audits
 
-- Fetches complete schema from Airtable Metadata API
-- **Schema-only mode**: table structure, field types, relationships, select choices, dependency graph — in seconds
-- **Full mode**: downloads all records, computes per-field statistics (null rates, value distributions, cardinality detection), flags data quality issues
-- Builds dependency graph with topological sort for import order
-- Detects circular dependencies and cross-base links
-- Generates a comprehensive markdown report
+- **Schema structure** — tables, fields, types, relationships, dependency graph, import order
+- **Data quality** — null rates, value distributions, constant fields, composite values, similar choices (typo detection)
+- **Migration complexity** — Many-to-One vs Many-to-Many relationships, circular dependencies, cross-base links
+- **Recommendations** — target PostgreSQL schema, dictionary candidates, computed fields to recreate, attachment migration plan
 
 ## Quick Start
 
@@ -60,7 +62,13 @@ cat data/*/AIRTABLE_REPORT.md
 
 ## Claude Code Skill
 
-This project includes a Claude Code skill at `.claude/skills/airtable-migration-audit/SKILL.md`. When used with Claude Code, invoke `/airtable-migration-audit` for a guided analysis walkthrough.
+This project includes a [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill. Run `/airtable-migration-audit` and the agent will:
+
+1. Run the audit (or use an existing report)
+2. Read the generated report
+3. Deliver a structured verdict: complexity verdict, blockers, schema recommendation, and next steps
+
+The skill is at `.claude/skills/airtable-migration-audit/SKILL.md`.
 
 ## Environment Variables
 
@@ -77,13 +85,14 @@ Each run creates a timestamped subfolder under `data/`:
 ```
 data/
   2025-01-15_0930_appXXX_appYYY/
-    AIRTABLE_REPORT.md    # Human-readable analysis
-    raw-schema.json       # Raw Airtable schema
+    AIRTABLE_REPORT.md     # Markdown report (for agents / CLI)
+    AIRTABLE_REPORT.html   # Interactive HTML report (open in browser)
+    raw-schema.json        # Raw Airtable schema
   2025-01-15_1415_appXXX_appYYY/
     ...
 ```
 
-Each run includes a timestamp (HHMM) so previous reports are never overwritten.
+Each run includes a timestamp (HHMM) so previous reports are never overwritten. The HTML report is a single self-contained file with dark/light mode, collapsible sections, and sidebar navigation — no external dependencies.
 
 ## Project Structure
 

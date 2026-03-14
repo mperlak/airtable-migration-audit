@@ -1,7 +1,7 @@
 {
   "name": "airtable-migration-audit",
   "version": "1.0.0",
-  "description": "Discover and analyze Airtable data — fetches schema + all records, computes per-field statistics, generates a data analysis report",
+  "description": "Audit Airtable bases for migration readiness — schema analysis, data quality checks, complexity scoring, and actionable migration plan",
   "type": "module",
   "scripts": {
     "discover": "tsx src/discover.ts",

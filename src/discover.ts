@@ -27,7 +27,9 @@ import type { AirtableTable, AirtableRecord, AirtableBaseMeta } from "./lib/airt
 import { analyzeTable, buildDependencyGraph, collectFlags } from "./lib/data-analyzer"
 import type { TableAnalysis } from "./lib/data-analyzer"
 import { generateReport } from "./lib/report-generator"
+import { generateHtmlReport } from "./lib/html-report-generator"
 import { generateSchemaReport } from "./lib/schema-report-generator"
+import { generateSchemaHtmlReport } from "./lib/schema-html-report-generator"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_ROOT = resolve(__dirname, "..", "data")
@@ -186,9 +188,14 @@ async function main() {
     const reportPath = resolve(DATA_DIR, "AIRTABLE_REPORT.md")
     writeFileSync(reportPath, report, "utf-8")
 
+    const schemaHtml = generateSchemaHtmlReport({ bases, tables: allTables, generatedAt: new Date() })
+    const htmlPath = resolve(DATA_DIR, "AIRTABLE_REPORT.html")
+    writeFileSync(htmlPath, schemaHtml, "utf-8")
+
     const totalFields = allTables.reduce((s, t) => s + t.fields.length, 0)
 
-    console.log(`✅ Report saved to ${reportPath}`)
+    console.log(`✅ Markdown report saved to ${reportPath}`)
+    console.log(`✅ HTML report saved to ${htmlPath}`)
     console.log("")
     console.log("=".repeat(60))
     console.log("📊 Schema Summary")
@@ -196,8 +203,9 @@ async function main() {
     console.log(`   Tables: ${allTables.length}`)
     console.log(`   Fields: ${totalFields}`)
     console.log("")
-    console.log(`   Report: ${reportPath}`)
-    console.log(`   Schema: ${schemaPath}`)
+    console.log(`   Report (MD):   ${reportPath}`)
+    console.log(`   Report (HTML): ${htmlPath}`)
+    console.log(`   Schema (JSON): ${schemaPath}`)
     console.log("")
     console.log("Next steps:")
     console.log("   • Review table structure and relationships in the report")
@@ -273,7 +281,18 @@ async function main() {
 
   const reportPath = resolve(DATA_DIR, "AIRTABLE_REPORT.md")
   writeFileSync(reportPath, report, "utf-8")
-  console.log(`✅ Report saved to ${reportPath}`)
+  console.log(`✅ Markdown report saved to ${reportPath}`)
+
+  const htmlReport = generateHtmlReport({
+    bases,
+    tables: tableAnalyses,
+    graph,
+    flags,
+    generatedAt: new Date(),
+  })
+  const htmlPath = resolve(DATA_DIR, "AIRTABLE_REPORT.html")
+  writeFileSync(htmlPath, htmlReport, "utf-8")
+  console.log(`✅ HTML report saved to ${htmlPath}`)
 
   // --- Summary ---
   console.log("\n" + "=".repeat(60))
@@ -286,8 +305,9 @@ async function main() {
   console.log(`   Total fields:    ${tableAnalyses.reduce((s, t) => s + t.fieldSummary.total, 0)}`)
   console.log(`   Quality flags:   ${flags.length} (${warnings} warnings)`)
   console.log("")
-  console.log(`   Report: ${reportPath}`)
-  console.log(`   Schema: ${schemaPath}`)
+  console.log(`   Report (MD):   ${reportPath}`)
+  console.log(`   Report (HTML): ${htmlPath}`)
+  console.log(`   Schema (JSON): ${schemaPath}`)
   console.log("")
   console.log("Next steps:")
   console.log("   1. Read the report: data/AIRTABLE_REPORT.md")

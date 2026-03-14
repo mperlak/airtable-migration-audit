@@ -50,7 +50,7 @@ export function generateSchemaReport(input: SchemaReportInput): string {
       .map(([name]) => name)
   )
 
-  lines.push("# Airtable Schema Report by [straktur.com](https://straktur.com)")
+  lines.push("# Airtable Schema Report by [straktur.com](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=report&utm_content=header)")
   lines.push("")
   lines.push(`**Generated:** ${formatDateTime(generatedAt)}  `)
   lines.push(`**Bases analyzed:** ${bases.map((b) => `${b.baseName} (${b.baseId})`).join(", ")}  `)
