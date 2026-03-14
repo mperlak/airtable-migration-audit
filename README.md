@@ -119,31 +119,31 @@ Example (abbreviated):
 {
   "schemaVersion": 1,
   "tables": [{
-    "airtableName": "Listy zakupów",
-    "dbTableName": "listy_zakupow",
+    "airtableName": "Shopping Lists",
+    "dbTableName": "shopping_lists",
     "columns": [{
-      "airtableName": "Nazwa",
-      "dbColumnName": "nazwa",
+      "airtableName": "Name",
+      "dbColumnName": "name",
       "airtableType": "singleLineText",
       "pgType": "varchar(150)",
       "nullable": false,
       "validation": { "type": "string", "maxLength": 128 }
     }],
     "relations": [{
-      "airtableFieldName": "Projekt",
-      "dbColumnName": "projekt_id",
+      "airtableFieldName": "Project",
+      "dbColumnName": "project_id",
       "type": "manyToOne",
-      "targetTable": "projekty"
+      "targetTable": "projects"
     }],
     "lookupTables": [{
       "airtableFieldName": "Status",
       "dbColumnName": "status_id",
-      "lookupTableName": "listy_zakupow_status",
-      "values": [{ "name": "Aktywna", "usageCount": 150 }]
+      "lookupTableName": "shopping_lists_status",
+      "values": [{ "name": "Active", "usageCount": 150 }]
     }]
   }],
-  "junctionTables": [{ "dbTableName": "listy_zakupow_to_produkty", "reason": "manyToMany" }],
-  "importOrder": ["producenci", "produkty", "projekty", "listy_zakupow"]
+  "junctionTables": [{ "dbTableName": "shopping_lists_to_products", "reason": "manyToMany" }],
+  "importOrder": ["manufacturers", "products", "projects", "shopping_lists"]
 }
 ```
 
