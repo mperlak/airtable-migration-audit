@@ -63,7 +63,7 @@ npm run discover           # Full — schema + all records (minutes)
 - Data quality flags (long text, unused choices, high nullity)
 - **`MIGRATION.json`** — machine-consumable migration spec (see below)
 
-## Install as Claude Code Skill
+## Install as AI Agent Skill
 
 Install the `/airtable-migration-audit` skill into any project — the agent will run the audit, read the report, and deliver a structured verdict with complexity, blockers, schema recommendation, and next steps.
 
@@ -73,6 +73,8 @@ Install the `/airtable-migration-audit` skill into any project — the agent wil
 npx skills add mperlak/airtable-migration-audit
 ```
 
+Works with Claude Code, OpenAI Codex, and any agent that supports the [Agent Skills spec](https://agentskills.io).
+
 ### Option 2: Claude Code Plugin
 
 ```
@@ -80,14 +82,23 @@ npx skills add mperlak/airtable-migration-audit
 /plugin install airtable-migration-audit
 ```
 
-### Option 3: Clone and copy
+### Option 3: OpenAI Codex
+
+```
+$skill-installer install https://github.com/mperlak/airtable-migration-audit/tree/main/skills/airtable-migration-audit
+```
+
+### Option 4: Clone and copy
 
 ```bash
 git clone https://github.com/mperlak/airtable-migration-audit.git
+# Claude Code
 cp -r airtable-migration-audit/skills/airtable-migration-audit .claude/skills/
+# OpenAI Codex
+cp -r airtable-migration-audit/skills/airtable-migration-audit .agents/skills/
 ```
 
-Once installed, run `/airtable-migration-audit` in Claude Code.
+Once installed, run `/airtable-migration-audit` in your agent.
 
 ## Environment Variables
 
