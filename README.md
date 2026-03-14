@@ -63,15 +63,31 @@ npm run discover           # Full — schema + all records (minutes)
 - Data quality flags (long text, unused choices, high nullity)
 - **`MIGRATION.json`** — machine-consumable migration spec (see below)
 
-## Claude Code Skill
+## Install as Claude Code Skill
 
-This project includes a [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill. Run `/airtable-migration-audit` and the agent will:
+Install the `/airtable-migration-audit` skill into any project — the agent will run the audit, read the report, and deliver a structured verdict with complexity, blockers, schema recommendation, and next steps.
 
-1. Run the audit (or use an existing report)
-2. Read the generated report
-3. Deliver a structured verdict: complexity verdict, blockers, schema recommendation, and next steps
+### Option 1: npx (recommended)
 
-The skill is at `.claude/skills/airtable-migration-audit/SKILL.md`.
+```bash
+npx skills add mperlak/airtable-migration-audit
+```
+
+### Option 2: Claude Code Plugin
+
+```
+/plugin marketplace add mperlak/airtable-migration-audit
+/plugin install airtable-migration-audit
+```
+
+### Option 3: Clone and copy
+
+```bash
+git clone https://github.com/mperlak/airtable-migration-audit.git
+cp -r airtable-migration-audit/skills/airtable-migration-audit .claude/skills/
+```
+
+Once installed, run `/airtable-migration-audit` in Claude Code.
 
 ## Environment Variables
 
@@ -162,8 +178,9 @@ airtable-migration-audit/
 │       ├── report-generator.ts      # Full analysis report
 │       ├── migration-json-generator.ts # MIGRATION.json output
 │       └── mapping.ts              # AT record ID ↔ target ID persistence
+├── skills/                         # Skills (for plugin distribution)
+├── .claude-plugin/                 # Plugin marketplace manifest
 ├── data/                           # Generated output (gitignored)
-├── .claude/skills/                 # Claude Code skill definition
 ├── package.json
 └── tsconfig.json
 ```

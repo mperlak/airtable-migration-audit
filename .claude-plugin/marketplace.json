@@ -1,0 +1,23 @@
+{
+  "name": "airtable-migration-audit",
+  "owner": {
+    "name": "straktur.com",
+    "url": "https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=marketplace"
+  },
+  "metadata": {
+    "description": "Audit Airtable bases for migration readiness — complexity verdict, schema recommendations, data quality analysis, and MIGRATION.json output",
+    "version": "1.0.0",
+    "repository": "https://github.com/mperlak/airtable-migration-audit"
+  },
+  "plugins": [
+    {
+      "name": "airtable-migration-audit",
+      "description": "Audit Airtable bases for PostgreSQL migration — analyzes schema, data quality, relationships, and generates a structured MIGRATION.json with PostgreSQL types, import order, and validation constraints",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/airtable-migration-audit"
+      ]
+    }
+  ]
+}
