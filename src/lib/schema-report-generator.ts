@@ -146,7 +146,12 @@ export function generateSchemaReport(input: SchemaReportInput): string {
         const choices = f.options?.choices ?? []
         if (choices.length === 0) continue
         const multi = f.type === "multipleSelects" ? " (multi)" : ""
-        lines.push(`**${f.name}**${multi}: ${choices.map((c) => c.name).join(", ")}`)
+        const sorted = [...choices].sort((a, b) => a.name.localeCompare(b.name))
+        const formatted = sorted.map((c) => {
+          const isRecordId = /^rec[A-Za-z0-9]{14,}$/.test(c.name)
+          return isRecordId ? `${c.name} (\u26a0\ufe0f record ID?)` : c.name
+        })
+        lines.push(`**${f.name}**${multi}: ${formatted.join(" \u00b7 ")}`)
         lines.push("")
       }
     }

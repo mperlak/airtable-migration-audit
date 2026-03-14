@@ -403,6 +403,55 @@ function analyzeDateField(
   }
 }
 
+/**
+ * Find pairs of select choices that look like duplicates/typos.
+ * Uses word overlap: if two choices share >70% of their words, they're likely variants.
+ * Only runs on fields with <= 100 used choices (to avoid O(n²) on huge fields).
+ */
+function findSimilarChoices(
+  usedChoices: { name: string; count: number }[]
+): { a: string; b: string }[] {
+  if (usedChoices.length > 100 || usedChoices.length < 2) return []
+
+  const pairs: { a: string; b: string }[] = []
+
+  function tokenize(s: string): Set<string> {
+    return new Set(
+      s.toLowerCase()
+        .split(/[\s,;._\-\/\\()]+/)
+        .filter((w) => w.length > 1)
+    )
+  }
+
+  const tokenized = usedChoices.map((c) => ({
+    name: c.name,
+    tokens: tokenize(c.name),
+  }))
+
+  for (let i = 0; i < tokenized.length; i++) {
+    for (let j = i + 1; j < tokenized.length; j++) {
+      const a = tokenized[i]!
+      const b = tokenized[j]!
+
+      if (a.tokens.size < 2 || b.tokens.size < 2) continue
+
+      let overlap = 0
+      for (const token of a.tokens) {
+        if (b.tokens.has(token)) overlap++
+      }
+
+      const maxSize = Math.max(a.tokens.size, b.tokens.size)
+      const ratio = overlap / maxSize
+
+      if (ratio > 0.7 && a.name !== b.name) {
+        pairs.push({ a: a.name, b: b.name })
+      }
+    }
+  }
+
+  return pairs
+}
+
 function analyzeSelectField(
   field: AirtableField,
   records: AirtableRecord[],
@@ -452,6 +501,49 @@ function analyzeSelectField(
     if (uc.count <= 2 && nonNullCount > 20) {
       flags.push(`Choice "${uc.name}" used by only ${uc.count} record(s)`)
     }
+  }
+
+  // Change 4: Constant or single-value field
+  if (usedChoices.length === 1 && usedChoices[0]!.count === nonNullCount && nonNullCount > 0) {
+    if (base.nullPercent <= 50) {
+      // True constant — nearly all records have the same value
+      flags.push(
+        `Constant field — all ${nonNullCount} records have value "${usedChoices[0]!.name}". Consider removing instead of migrating`
+      )
+    } else {
+      // Rare single-value field — acts more like a boolean flag
+      flags.push(
+        `Single-value field — only value is "${usedChoices[0]!.name}" (${nonNullCount} records, ${base.nullPercent}% null). Consider converting to boolean`
+      )
+    }
+  }
+
+  // Change 5: Composite values — choice names containing comma/semicolon (singleSelect only)
+  if (!isMultiple) {
+    const compositeChoices = usedChoices.filter(
+      (uc) => uc.name.includes(",") || uc.name.includes(";")
+    )
+    if (compositeChoices.length > 0) {
+      const examples = compositeChoices
+        .slice(0, 3)
+        .map((c) => `"${c.name}"`)
+        .join(", ")
+      flags.push(
+        `${compositeChoices.length} choice(s) contain commas — possible composite values (${examples}). Consider decomposing into separate fields or a many-to-many relationship`
+      )
+    }
+  }
+
+  // Change 6: Similar choices — likely duplicates/typos (skip if too many pairs — domain, not typos)
+  const similarPairs = findSimilarChoices(usedChoices)
+  if (similarPairs.length > 0 && similarPairs.length <= 10) {
+    const examples = similarPairs
+      .slice(0, 3)
+      .map((p) => `"${truncate(p.a, 40)}" ≈ "${truncate(p.b, 40)}"`)
+      .join("; ")
+    flags.push(
+      `${similarPairs.length} pair(s) of similar choices — possible duplicates/typos: ${examples}`
+    )
   }
 
   return {
@@ -899,7 +991,12 @@ export function collectFlags(tables: TableAnalysis[]): DataQualityFlag[] {
     for (const field of table.fields) {
       for (const flagText of field.flags) {
         flags.push({
-          severity: flagText.includes("skip") || flagText.includes("rarely") ? "info" : "warning",
+          severity: (
+            flagText.includes("skip") ||
+            flagText.includes("rarely") ||
+            flagText.includes("All values are integers") ||
+            (flagText.includes("only") && flagText.includes("checked"))
+          ) ? "info" : "warning",
           category: categorizeFlag(flagText),
           table: table.tableName,
           field: field.fieldName,
@@ -913,6 +1010,10 @@ export function collectFlags(tables: TableAnalysis[]): DataQualityFlag[] {
 }
 
 function categorizeFlag(text: string): string {
+  if (text.includes("Constant field")) return "Constant field"
+  if (text.includes("Single-value field")) return "Single-value field"
+  if (text.includes("composite values")) return "Composite value"
+  if (text.includes("similar choices")) return "Similar choices"
   if (text.includes("dictionary")) return "Dictionary candidate"
   if (text.includes("text()") || text.includes("Max length")) return "Long text"
   if (text.includes("rarely") || text.includes("empty")) return "Low usage"

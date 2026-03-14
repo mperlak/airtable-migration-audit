@@ -53,6 +53,13 @@ export function generateReport(input: ReportInput): string {
   lines.push("")
 
   appendSummary(lines, tables, flags)
+
+  // Migration readiness FIRST (before per-table details)
+  appendNextSteps(lines, tables, graph, flags)
+
+  // Actionable warnings only (replaces old appendFlags)
+  appendWarnings(lines, flags)
+
   appendImportOrder(lines, graph, tables)
 
   if (graph.cycles.length > 0) {
@@ -67,9 +74,7 @@ export function generateReport(input: ReportInput): string {
     appendTable(lines, table, duplicateNames)
   }
 
-  appendFlags(lines, flags)
-
-  appendNextSteps(lines, tables, graph, flags)
+  appendFooter(lines)
 
   return lines.join("\n")
 }
@@ -197,14 +202,15 @@ function appendTable(lines: string[], table: TableAnalysis, duplicateNames: Set<
     lines.push("")
   }
 
-  // Fields overview table
-  lines.push("### Fields Overview")
+  // Fields overview table — data fields only (computed fields have their own section)
+  const overviewFields = table.fields.filter((f) => f.kind !== "computed")
+  lines.push(`### Fields Overview (${overviewFields.length} data fields)`)
   lines.push("")
   lines.push("| # | Field | AT Type | Null% | Notes |")
   lines.push("|---|-------|---------|-------|-------|")
 
-  for (let i = 0; i < table.fields.length; i++) {
-    const f = table.fields[i]!
+  for (let i = 0; i < overviewFields.length; i++) {
+    const f = overviewFields[i]!
     const num = i + 1
     const typeStr = fieldTypeDisplay(f)
     const nullStr = fieldNullDisplay(f)
@@ -214,12 +220,46 @@ function appendTable(lines: string[], table: TableAnalysis, duplicateNames: Set<
 
   lines.push("")
 
-  // Field details
-  lines.push("### Field Details")
-  lines.push("")
+  // Computed fields summary (instead of individual sections)
+  const computedFields = table.fields.filter(
+    (f): f is ComputedFieldAnalysis => f.kind === "computed"
+  )
+  if (computedFields.length > 0) {
+    lines.push("### Computed Fields (skip during import)")
+    lines.push("")
+    lines.push("| Field | AT Type | Result Type | Recreate As |")
+    lines.push("|-------|---------|-------------|-------------|")
+    for (const cf of computedFields) {
+      const resultType = cf.resultType ?? "—"
+      const recreate = recreateHint(cf)
+      lines.push(`| ${cf.fieldName} | ${cf.fieldType} | ${resultType} | ${recreate} |`)
+    }
+    lines.push("")
+  }
 
-  for (const f of table.fields) {
-    appendFieldDetail(lines, f)
+  // Field details — NON-COMPUTED only
+  const dataFields = table.fields.filter((f) => f.kind !== "computed")
+  if (dataFields.length > 0) {
+    lines.push("### Field Details")
+    lines.push("")
+    for (const f of dataFields) {
+      appendFieldDetail(lines, f)
+    }
+  }
+}
+
+function recreateHint(f: ComputedFieldAnalysis): string {
+  switch (f.fieldType) {
+    case "formula":
+      return "App logic or generated column"
+    case "rollup":
+      return "SQL aggregate / JOIN"
+    case "count":
+      return "SQL COUNT or app logic"
+    case "multipleLookupValues":
+      return "SQL JOIN"
+    default:
+      return "App logic"
   }
 }
 
@@ -472,24 +512,55 @@ function appendGenericDetail(lines: string[], f: FieldAnalysis): void {
 // Data quality flags table
 // ---------------------------------------------------------------------------
 
-function appendFlags(lines: string[], flags: DataQualityFlag[]): void {
-  if (flags.length === 0) return
+function appendWarnings(lines: string[], flags: DataQualityFlag[]): void {
+  const warnings = flags.filter((f) => f.severity === "warning")
+  if (warnings.length === 0) return
 
-  lines.push("---")
+  lines.push("## Data Quality Warnings")
   lines.push("")
-  lines.push("## Data Quality Flags")
-  lines.push("")
-  lines.push("| Severity | Category | Table | Field | Detail |")
-  lines.push("|----------|----------|-------|-------|--------|")
 
-  for (const flag of flags) {
-    const icon = flag.severity === "warning" ? "⚠️" : "ℹ️"
-    lines.push(
-      `| ${icon} ${flag.severity} | ${flag.category} | ${flag.table} | ${flag.field} | ${escMd(flag.detail)} |`
-    )
+  // Group by action type
+  const groups: Record<string, DataQualityFlag[]> = {
+    "Data cleanup needed": [],
+    "Schema decisions": [],
+    "Low-priority cleanup": [],
   }
 
-  lines.push("")
+  for (const w of warnings) {
+    if (
+      w.category === "Similar choices" ||
+      w.category === "Composite value" ||
+      w.category === "Constant field" ||
+      w.category === "Single-value field" ||
+      w.category === "Dictionary candidate" ||
+      (w.category === "Other" && w.detail.includes("used by only"))
+    ) {
+      groups["Data cleanup needed"]!.push(w)
+    } else if (
+      w.category === "Many-to-Many" ||
+      w.category === "Many-to-One" ||
+      w.category === "Long text" ||
+      w.category === "Attachments" ||
+      w.category === "Integer field" ||
+      w.category === "Single link"
+    ) {
+      groups["Schema decisions"]!.push(w)
+    } else {
+      groups["Low-priority cleanup"]!.push(w)
+    }
+  }
+
+  for (const [groupName, groupFlags] of Object.entries(groups)) {
+    if (groupFlags.length === 0) continue
+    lines.push(`### ${groupName}`)
+    lines.push("")
+    lines.push("| Table | Field | Issue |")
+    lines.push("|-------|-------|-------|")
+    for (const f of groupFlags) {
+      lines.push(`| ${f.table} | ${f.field} | ${escMd(f.detail)} |`)
+    }
+    lines.push("")
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -675,12 +746,13 @@ function appendNextSteps(
     `${step}. **Import in dependency order** — follow the import order table above to maintain referential integrity`
   )
   lines.push("")
+}
 
-  // --- Attribution ---
+function appendFooter(lines: string[]): void {
   lines.push("---")
   lines.push("")
   lines.push(
-    "*This report was generated by [airtable-discover](https://github.com/mperlak/airtable-discover) — a free, open-source Airtable migration analysis tool. Built by the creator of [Straktur](https://straktur.com), a Next.js boilerplate for internal business apps.*"
+    "*This report was generated by [airtable-base-audit](https://github.com/mperlak/airtable-base-audit) — a free, open-source Airtable migration analysis tool. Built by the creator of [Straktur](https://straktur.com), a Next.js boilerplate for internal business apps.*"
   )
   lines.push("")
 }
