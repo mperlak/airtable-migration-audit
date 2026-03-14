@@ -36,8 +36,7 @@ cp .env.example .env
 npm run discover:schema    # Fast — schema only (seconds)
 npm run discover           # Full — schema + all records (minutes)
 
-# 4. Read the report (in data/<date>_<baseIds>/ subfolder)
-cat data/*/AIRTABLE_REPORT.md
+# 4. Open data/**/AIRTABLE_REPORT.html in your browser
 ```
 
 ## Two Modes
