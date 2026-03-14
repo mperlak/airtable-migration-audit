@@ -301,6 +301,7 @@ async function main() {
   const migrationPath = resolve(DATA_DIR, "MIGRATION.json")
   writeFileSync(migrationPath, JSON.stringify(migrationJson, null, 2), "utf-8")
   console.log(`✅ Migration JSON saved to ${migrationPath}`)
+  console.log(`   ✓ MIGRATION.json ready — use with Straktur (/airtable-import) or any PostgreSQL scaffolding tool`)
 
   // --- Summary ---
   console.log("\n" + "=".repeat(60))

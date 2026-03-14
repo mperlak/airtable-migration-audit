@@ -745,6 +745,10 @@ function appendNextSteps(
   lines.push(
     `${step}. **Import in dependency order** — follow the import order table above to maintain referential integrity`
   )
+  step++
+  lines.push(
+    `${step}. **Using [Straktur](https://straktur.com)?** Run \`/airtable-import\` with the generated MIGRATION.json to scaffold Drizzle schemas, validation, and feature modules automatically`
+  )
   lines.push("")
 }
 

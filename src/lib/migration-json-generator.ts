@@ -1,15 +1,15 @@
 /**
- * Generates a structured MIGRATION.json for the Straktur scaffolding agent.
+ * Generates a structured MIGRATION.json — framework-agnostic PostgreSQL
+ * migration spec. Can be consumed by any scaffolding tool (Straktur, Prisma,
+ * Django, raw SQL, etc.).
  *
- * Maps Airtable schema + analysis data → Drizzle types, snake_case names,
- * relations, dictionaries, junction tables, and import order.
+ * Maps Airtable schema + analysis data → PostgreSQL types, snake_case names,
+ * relations, lookup tables, junction tables, and import order.
  */
 
 import type {
   TableAnalysis,
   FieldAnalysis,
-  TextFieldAnalysis,
-  NumericFieldAnalysis,
   SelectFieldAnalysis,
   LinkedRecordFieldAnalysis,
   ComputedFieldAnalysis,
@@ -36,7 +36,7 @@ interface MigrationTable {
   importOrder: number
   columns: Column[]
   relations: Relation[]
-  dictionaries: Dictionary[]
+  lookupTables: LookupTable[]
   skip: SkipField[]
   computedFields: ComputedField[]
 }
@@ -45,9 +45,10 @@ interface Column {
   airtableName: string
   dbColumnName: string
   airtableType: string
-  drizzleType: string
+  pgType: string
   nullable: boolean
   isPrimary: boolean
+  default?: string
   validation: ColumnValidation | null
 }
 
@@ -68,10 +69,10 @@ interface Relation {
   targetAirtableName: string
 }
 
-interface Dictionary {
+interface LookupTable {
   airtableFieldName: string
   dbColumnName: string
-  dictionaryType: string
+  lookupTableName: string
   isMultiple: boolean
   values: { name: string; usageCount: number }[]
 }
@@ -150,62 +151,67 @@ function deduplicateNames<T>(items: T[], getter: (t: T) => string, setter: (t: T
 const SKIP_TYPES = new Set(["autoNumber", "lastModifiedTime", "lastModifiedBy", "createdBy"])
 const COMPUTED_TYPES = new Set(["formula", "rollup", "count", "multipleLookupValues"])
 
-function mapDrizzleType(field: FieldAnalysis): string {
+interface PgTypeResult {
+  pgType: string
+  default?: string
+}
+
+function mapPgType(field: FieldAnalysis): PgTypeResult {
   switch (field.fieldType) {
     case "singleLineText":
     case "email":
     case "url":
     case "phoneNumber": {
       if (field.kind === "text" && field.maxLength > 0 && field.maxLength <= 255) {
-        return `varchar(${ceilTo50(field.maxLength)})`
+        return { pgType: `varchar(${ceilTo50(field.maxLength)})` }
       }
-      return "text()"
+      return { pgType: "text" }
     }
     case "multilineText":
     case "richText":
-      return "text()"
+      return { pgType: "text" }
 
     case "number": {
       if (field.kind === "numeric") {
-        if (field.allIntegers) return "integer()"
+        if (field.allIntegers) return { pgType: "integer" }
         const scale = Math.max(field.maxDecimalPlaces, 2)
         const intDigits = Math.max(String(Math.floor(Math.abs(field.max))).length, 1)
         const precision = intDigits + scale
-        return `numeric({ precision: ${precision}, scale: ${scale} })`
+        return { pgType: `numeric(${precision},${scale})` }
       }
-      return "integer()"
+      return { pgType: "integer" }
     }
     case "currency":
-      return "numeric({ precision: 12, scale: 2 })"
+      return { pgType: "numeric(12,2)" }
     case "percent":
-      return "numeric({ precision: 5, scale: 2 })"
+      return { pgType: "numeric(5,2)" }
     case "rating":
     case "duration":
-      return "integer()"
+      return { pgType: "integer" }
 
     case "checkbox":
-      return "boolean().default(false)"
+      return { pgType: "boolean", default: "false" }
 
     case "date":
     case "dateTime":
-      return "timestamp()"
+      return { pgType: "timestamp" }
     case "createdTime":
-      return "timestamp().defaultNow()"
+      return { pgType: "timestamp", default: "now()" }
 
     case "singleSelect":
-      return "uuid()" // FK to dictionary_values
+      return { pgType: "uuid" } // FK to lookup table
     case "multipleSelects":
-      return "uuid()" // junction table handles it
+      return { pgType: "uuid" } // junction table handles it
 
     case "multipleRecordLinks":
       // M2O produces uuid FK; M2M produces junction table (handled elsewhere)
-      return "uuid()"
+      return { pgType: "uuid" }
 
     case "multipleAttachments":
-      return "uuid()" // separate attachment reference
+      return { pgType: "uuid" } // separate attachment reference
 
     default:
-      return "text()"
+      return { pgType: "text" }
   }
 }
 
@@ -271,7 +277,7 @@ export function generateMigrationJson(input: {
 
     const columns: Column[] = []
     const relations: Relation[] = []
-    const dictionaries: Dictionary[] = []
+    const lookupTables: LookupTable[] = []
     const skip: SkipField[] = []
     const computedFields: ComputedField[] = []
 
@@ -311,15 +317,16 @@ export function generateMigrationJson(input: {
       const dbColumnName = toSnakeCase(field.fieldName)
       const nullable = field.nullPercent > 0 || field.totalRecords === 0
 
-      // Select fields → dictionary
+      // Select fields → lookup table
       if (field.fieldType === "singleSelect" || field.fieldType === "multipleSelects") {
         const sf = field as SelectFieldAnalysis
         const isMultiple = sf.isMultiple
+        const lookupTableName = `${dbTableName}_${dbColumnName}`
 
-        dictionaries.push({
+        lookupTables.push({
           airtableFieldName: field.fieldName,
           dbColumnName: isMultiple ? dbColumnName : `${dbColumnName}_id`,
-          dictionaryType: `${dbTableName}_${dbColumnName}`,
+          lookupTableName,
           isMultiple,
           values: sf.usedChoices.map((c) => ({ name: c.name, usageCount: c.count })),
         })
@@ -327,11 +334,11 @@ export function generateMigrationJson(input: {
         if (isMultiple) {
           // multipleSelects need a junction table
           junctionTables.push({
-            dbTableName: `${dbTableName}_${dbColumnName}`,
+            dbTableName: `${dbTableName}_${dbColumnName}_jn`,
             sourceTable: dbTableName,
-            targetTable: "dictionary_values",
+            targetTable: lookupTableName,
             sourceColumn: `${dbTableName}_id`,
-            targetColumn: "dictionary_value_id",
+            targetColumn: `${lookupTableName}_id`,
             reason: "multipleSelects",
           })
         }
@@ -391,15 +398,18 @@ export function generateMigrationJson(input: {
       }
 
       // Regular column
-      columns.push({
+      const { pgType, default: pgDefault } = mapPgType(field)
+      const col: Column = {
         airtableName: field.fieldName,
         dbColumnName,
         airtableType: field.fieldType,
-        drizzleType: mapDrizzleType(field),
+        pgType,
         nullable,
         isPrimary: field.isPrimary,
         validation: buildValidation(field),
-      })
+      }
+      if (pgDefault) col.default = pgDefault
+      columns.push(col)
     }
 
     // Deduplicate column names within this table
@@ -413,7 +423,7 @@ export function generateMigrationJson(input: {
       importOrder: order,
       columns,
       relations,
-      dictionaries,
+      lookupTables,
       skip,
       computedFields,
     })

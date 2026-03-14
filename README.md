@@ -101,15 +101,15 @@ Each run includes a timestamp (HHMM) so previous reports are never overwritten. 
 
 ### MIGRATION.json
 
-Generated in **full mode only** (requires record data for cardinality and validation analysis). This file is a structured, machine-consumable migration specification designed to be consumed by scaffolding agents — for example, the [Straktur](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=readme-migration-json) migration agent that auto-generates Drizzle schemas, Zod validation, dictionary seeds, and feature modules.
+Generated in **full mode only** (requires record data for cardinality and validation analysis). This file is a framework-agnostic, machine-consumable PostgreSQL migration specification. Framework adapters (e.g. [Straktur](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=readme-migration-json), Prisma, Django) consume this file to scaffold target applications.
 
 The JSON contains:
 
 - **Tables** — each with a proposed `dbTableName` (mechanical snake_case, no translation), record count, and import order
-- **Columns** — Airtable type → Drizzle type mapping (e.g. `singleLineText` → `varchar(150)`, `number` with decimals → `numeric({ precision, scale })`), nullability, and Zod-compatible validation constraints
+- **Columns** — Airtable type → PostgreSQL type mapping (e.g. `singleLineText` → `varchar(150)`, `number` with decimals → `numeric(12,2)`), nullability, optional defaults, and validation constraints
 - **Relations** — Many-to-One foreign keys derived from linked record cardinality analysis
 - **Junction tables** — auto-generated for Many-to-Many relationships and multi-select fields
-- **Dictionaries** — single/multi-select fields extracted into dictionary reference tables, with all values and usage counts
+- **Lookup tables** — single/multi-select fields extracted into dedicated lookup tables, with all values and usage counts
 - **Computed fields** — formulas, rollups, counts flagged as `recreateAs: "app-logic"`
 - **Skip list** — auto-numbers, system fields (createdBy, lastModifiedTime) that have DB-native equivalents
 - **Import order** — topologically sorted table list respecting foreign key dependencies
@@ -126,7 +126,7 @@ Example (abbreviated):
       "airtableName": "Nazwa",
       "dbColumnName": "nazwa",
       "airtableType": "singleLineText",
-      "drizzleType": "varchar(150)",
+      "pgType": "varchar(150)",
       "nullable": false,
       "validation": { "type": "string", "maxLength": 128 }
     }],
@@ -136,10 +136,10 @@ Example (abbreviated):
       "type": "manyToOne",
       "targetTable": "projekty"
     }],
-    "dictionaries": [{
+    "lookupTables": [{
       "airtableFieldName": "Status",
       "dbColumnName": "status_id",
-      "dictionaryType": "listy_zakupow_status",
+      "lookupTableName": "listy_zakupow_status",
       "values": [{ "name": "Aktywna", "usageCount": 150 }]
     }]
   }],
