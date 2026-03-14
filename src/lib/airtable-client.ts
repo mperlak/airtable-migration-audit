@@ -9,6 +9,12 @@ const AIRTABLE_API_URL = "https://api.airtable.com/v0"
 // Schema types (GET /v0/meta/bases/{baseId}/tables)
 // ---------------------------------------------------------------------------
 
+export interface AirtableBaseMeta {
+  id: string
+  name: string
+  permissionLevel: string
+}
+
 export interface AirtableBaseSchema {
   tables: AirtableTable[]
 }
@@ -219,6 +225,32 @@ export class AirtableClient {
     }
 
     throw new Error(`Airtable API: exceeded max retries (${maxRetries}) due to rate limiting`)
+  }
+
+  // -------------------------------------------------------------------------
+  // Base listing
+  // -------------------------------------------------------------------------
+
+  /**
+   * List all bases accessible by the current token.
+   * Uses the Metadata API — requires `schema.bases:read` scope.
+   */
+  async listBases(): Promise<AirtableBaseMeta[]> {
+    const all: AirtableBaseMeta[] = []
+    let offset: string | undefined
+
+    do {
+      const url = new URL(`${AIRTABLE_API_URL}/meta/bases`)
+      if (offset) url.searchParams.set("offset", offset)
+
+      const response = await this.throttledFetch(url.toString())
+      const data = (await response.json()) as { bases: AirtableBaseMeta[]; offset?: string }
+
+      all.push(...data.bases)
+      offset = data.offset
+    } while (offset)
+
+    return all
   }
 
   // -------------------------------------------------------------------------

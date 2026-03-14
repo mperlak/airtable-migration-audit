@@ -5,7 +5,7 @@ argument-hint: [optional: base IDs to analyze, or leave empty to use AIRTABLE_BA
 disable-model-invocation: true
 ---
 
-# Airtable Discover
+# Airtable Discover by straktur.com
 
 Analyzing Airtable data: **$ARGUMENTS**
 
@@ -19,12 +19,13 @@ Analyzing Airtable data: **$ARGUMENTS**
 ### Step 1: Check prerequisites
 
 1. Verify `.env` has `AIRTABLE_API_KEY` set (Personal Access Token starting with `pat...`)
-2. Verify `.env` has `AIRTABLE_BASE_IDS` set (comma-separated base IDs like `appXXX,appYYY`)
+2. Optionally check if `AIRTABLE_BASE_IDS` is set in `.env`:
+   - If set — those bases will be analyzed directly
+   - If not set — the script will auto-discover all bases available for the token and prompt the user to choose which ones to analyze
    - If the user provided base IDs as arguments, add them to `.env`
-   - If neither exists, ask the user for their base IDs
-3. Check if `data/AIRTABLE_REPORT.md` already exists
-   - If it exists, ask: "A previous report already exists. Re-run discovery or use the existing report?"
-   - If it doesn't exist, proceed to step 2
+3. Check if `data/` has existing report subfolders
+   - If reports exist, ask: "Previous reports exist. Re-run discovery or use an existing report?"
+   - Each run creates a new timestamped subfolder, so old reports are never overwritten
 
 ### Step 2: Choose discovery mode
 
@@ -52,7 +53,7 @@ If it fails:
 
 ### Step 4: Read and present the report
 
-Read `data/AIRTABLE_REPORT.md` and present findings to the user.
+Read the `AIRTABLE_REPORT.md` from the latest `data/<date>_<baseIds>/` subfolder and present findings to the user.
 
 **Start with the high-level summary:**
 
@@ -105,11 +106,11 @@ After the user understands their data, guide them to:
 
 ## Key files
 
-| File                         | Purpose                            |
-| ---------------------------- | ---------------------------------- |
-| `src/discover.ts`            | Main script — fetches and analyzes |
-| `data/AIRTABLE_REPORT.md`    | Generated report (gitignored)      |
-| `data/raw-schema.json`       | Raw Airtable schema (gitignored)   |
+| File                                        | Purpose                            |
+| ------------------------------------------- | ---------------------------------- |
+| `src/discover.ts`                           | Main script — fetches and analyzes |
+| `data/<date>_<baseIds>/AIRTABLE_REPORT.md`  | Generated report (gitignored)      |
+| `data/<date>_<baseIds>/raw-schema.json`     | Raw Airtable schema (gitignored)   |
 
 ## Tips
 

@@ -45,10 +45,11 @@ export function generateReport(input: ReportInput): string {
       .map(([name]) => name)
   )
 
-  lines.push("# Airtable Data Analysis Report")
+  lines.push("# Airtable Data Analysis Report by [straktur.com](https://straktur.com)")
   lines.push("")
-  lines.push(`Generated: ${formatDateTime(generatedAt)}`)
-  lines.push(`Bases analyzed: ${bases.map((b) => `${b.baseName} (${b.baseId})`).join(", ")}`)
+  lines.push(`**Generated:** ${formatDateTime(generatedAt)}  `)
+  lines.push(`**Bases analyzed:** ${bases.map((b) => `${b.baseName} (${b.baseId})`).join(", ")}  `)
+  lines.push(`**Mode:** full analysis (schema + record data)`)
   lines.push("")
 
   appendSummary(lines, tables, flags)

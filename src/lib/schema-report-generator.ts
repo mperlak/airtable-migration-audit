@@ -50,11 +50,11 @@ export function generateSchemaReport(input: SchemaReportInput): string {
       .map(([name]) => name)
   )
 
-  lines.push("# Airtable Schema Report")
+  lines.push("# Airtable Schema Report by [straktur.com](https://straktur.com)")
   lines.push("")
-  lines.push(`Generated: ${formatDateTime(generatedAt)}`)
-  lines.push(`Bases analyzed: ${bases.map((b) => `${b.baseName} (${b.baseId})`).join(", ")}`)
-  lines.push(`Mode: **schema-only** (no record data fetched)`)
+  lines.push(`**Generated:** ${formatDateTime(generatedAt)}  `)
+  lines.push(`**Bases analyzed:** ${bases.map((b) => `${b.baseName} (${b.baseId})`).join(", ")}  `)
+  lines.push(`**Mode:** schema-only (no record data fetched)`)
   lines.push("")
 
   // --- Summary ---
@@ -124,11 +124,13 @@ export function generateSchemaReport(input: SchemaReportInput): string {
     lines.push("| # | Field | Type | Notes |")
     lines.push("|---|-------|------|-------|")
 
+    const fieldNameById = new Map(table.fields.map((field) => [field.id, field.name]))
+
     for (let i = 0; i < table.fields.length; i++) {
       const f = table.fields[i]!
       const num = i + 1
       const typeStr = fieldTypeDisplay(f, tableNameById)
-      const notes = fieldNotes(f, table.primaryFieldId, tableNameById)
+      const notes = fieldNotes(f, table.primaryFieldId, tableNameById, fieldNameById)
       lines.push(`| ${num} | ${f.name} | ${typeStr} | ${notes} |`)
     }
 
@@ -176,10 +178,21 @@ function fieldTypeDisplay(f: AirtableField, tableNameById: Map<string, string>):
   return f.type
 }
 
+/**
+ * Replace field ID references like {fldXXX} with human-readable {Field Name}.
+ */
+function humanizeFormula(formula: string, fieldNameById: Map<string, string>): string {
+  return formula.replace(/\{(fld[A-Za-z0-9]+)\}/g, (_match, fieldId: string) => {
+    const name = fieldNameById.get(fieldId)
+    return name ? `{${name}}` : `{${fieldId}}`
+  })
+}
+
 function fieldNotes(
   f: AirtableField,
   primaryFieldId: string,
-  tableNameById: Map<string, string>
+  tableNameById: Map<string, string>,
+  fieldNameById: Map<string, string>
 ): string {
   const parts: string[] = []
 
@@ -210,7 +223,7 @@ function fieldNotes(
   }
 
   if (f.type === "formula" && f.options?.formula) {
-    parts.push(`\`${f.options.formula.slice(0, 60)}\``)
+    parts.push(`\`${humanizeFormula(f.options.formula, fieldNameById)}\``)
   }
 
   if (isComputedType(f.type)) {

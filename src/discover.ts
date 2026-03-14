@@ -7,11 +7,12 @@
  *
  * Reads from .env:
  *   AIRTABLE_API_KEY   — Personal Access Token (starts with pat...)
- *   AIRTABLE_BASE_IDS  — Comma-separated base IDs (e.g., appXXX,appYYY)
+ *   AIRTABLE_BASE_IDS  — (optional) Comma-separated base IDs (e.g., appXXX,appYYY)
+ *                         If omitted, lists available bases and prompts for selection.
  *
- * Output:
- *   data/AIRTABLE_REPORT.md   — Human-readable analysis (full or schema-only)
- *   data/raw-schema.json      — Raw Airtable schema
+ * Output (in data/<date>_<baseIds>/ subfolder):
+ *   AIRTABLE_REPORT.md   — Human-readable analysis (full or schema-only)
+ *   raw-schema.json      — Raw Airtable schema
  */
 
 import "dotenv/config"
@@ -19,16 +20,25 @@ import "dotenv/config"
 import { writeFileSync, mkdirSync, existsSync } from "node:fs"
 import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
+import { createInterface } from "node:readline"
 
 import { AirtableClient } from "./lib/airtable-client"
-import type { AirtableTable, AirtableRecord } from "./lib/airtable-client"
+import type { AirtableTable, AirtableRecord, AirtableBaseMeta } from "./lib/airtable-client"
 import { analyzeTable, buildDependencyGraph, collectFlags } from "./lib/data-analyzer"
 import type { TableAnalysis } from "./lib/data-analyzer"
 import { generateReport } from "./lib/report-generator"
 import { generateSchemaReport } from "./lib/schema-report-generator"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DATA_DIR = resolve(__dirname, "..", "data")
+const DATA_ROOT = resolve(__dirname, "..", "data")
+
+function buildRunDir(baseIds: string[]): string {
+  const now = new Date()
+  const date = now.toISOString().slice(0, 10)
+  const time = now.toTimeString().slice(0, 5).replace(":", "")
+  const suffix = baseIds.join("_")
+  return resolve(DATA_ROOT, `${date}_${time}_${suffix}`)
+}
 
 // ---------------------------------------------------------------------------
 // CLI args
@@ -36,6 +46,54 @@ const DATA_DIR = resolve(__dirname, "..", "data")
 
 const args = process.argv.slice(2)
 const schemaOnly = args.includes("--schema-only")
+
+// ---------------------------------------------------------------------------
+// Interactive prompt helper
+// ---------------------------------------------------------------------------
+
+function ask(question: string): Promise<string> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close()
+      resolve(answer.trim())
+    })
+  })
+}
+
+async function promptForBases(client: AirtableClient): Promise<{ id: string; name: string }[]> {
+  console.log("   Fetching available bases...\n")
+  const available = await client.listBases()
+
+  if (available.length === 0) {
+    console.error("❌ No bases found for this token. Check token permissions.")
+    process.exit(1)
+  }
+
+  console.log("   Available bases:\n")
+  available.forEach((base, i) => {
+    console.log(`   ${i + 1}. ${base.name} (${base.id})`)
+  })
+  console.log("")
+
+  const answer = await ask("   Which bases to analyze? (comma-separated numbers, or 'all'): ")
+
+  if (answer.toLowerCase() === "all") {
+    return available.map((b) => ({ id: b.id, name: b.name }))
+  }
+
+  const indices = answer
+    .split(",")
+    .map((s) => Number(s.trim()) - 1)
+    .filter((i) => i >= 0 && i < available.length)
+
+  if (indices.length === 0) {
+    console.error("❌ No valid selection. Exiting.")
+    process.exit(1)
+  }
+
+  return indices.map((i) => ({ id: available[i].id, name: available[i].name }))
+}
 
 // ---------------------------------------------------------------------------
 // Main
@@ -55,38 +113,45 @@ async function main() {
     process.exit(1)
   }
 
+  const client = new AirtableClient({ apiKey })
+
+  console.log("🔍 Airtable Discover by straktur.com")
+  console.log(`   Mode: ${schemaOnly ? "schema-only (fast)" : "full analysis (schema + data)"}`)
+
+  // --- Resolve base IDs ---
+  let baseIds: string[]
+  let baseNames: Map<string, string>
+
   const baseIdsRaw = process.env.AIRTABLE_BASE_IDS
-  if (!baseIdsRaw) {
-    console.error("❌ AIRTABLE_BASE_IDS not set")
-    console.error("   Provide comma-separated base IDs, e.g. AIRTABLE_BASE_IDS=appXXX,appYYY")
-    process.exit(1)
+  if (baseIdsRaw) {
+    baseIds = baseIdsRaw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+    baseNames = new Map(baseIds.map((id) => [id, id]))
+  } else {
+    const selected = await promptForBases(client)
+    baseIds = selected.map((b) => b.id)
+    baseNames = new Map(selected.map((b) => [b.id, b.name]))
   }
 
-  const baseIds = baseIdsRaw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
   if (baseIds.length === 0) {
-    console.error("❌ No valid base IDs found in AIRTABLE_BASE_IDS")
+    console.error("❌ No valid base IDs found")
     process.exit(1)
   }
 
   const useFieldIds = process.env.AIRTABLE_USE_FIELD_IDS !== "false"
 
-  console.log("🔍 Airtable Discover")
-  console.log(`   Mode: ${schemaOnly ? "schema-only (fast)" : "full analysis (schema + data)"}`)
-  console.log(`   Bases: ${baseIds.join(", ")}`)
+  console.log(`   Bases: ${baseIds.map((id) => baseNames.get(id) || id).join(", ")}`)
   if (!schemaOnly) {
     console.log(`   Field key mode: ${useFieldIds ? "field IDs" : "field names"}`)
   }
   console.log("")
 
-  const client = new AirtableClient({ apiKey })
-
   // --- Ensure data directory ---
-  if (!existsSync(DATA_DIR)) {
-    mkdirSync(DATA_DIR, { recursive: true })
-  }
+  const DATA_DIR = buildRunDir(baseIds)
+  mkdirSync(DATA_DIR, { recursive: true })
+  console.log(`   Output: ${DATA_DIR}\n`)
 
   // --- Fetch schemas ---
   const allTables: AirtableTable[] = []
@@ -99,7 +164,7 @@ async function main() {
 
     rawSchemas[baseId] = schema
     allTables.push(...schema.tables)
-    bases.push({ baseId, baseName: baseId })
+    bases.push({ baseId, baseName: baseNames.get(baseId) || baseId })
 
     console.log(`   Found ${schema.tables.length} tables`)
   }

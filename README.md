@@ -1,4 +1,4 @@
-# Airtable Discover
+# Airtable Discover by [straktur.com](https://straktur.com)
 
 Analyze your Airtable data before migration. Fetches schema (and optionally all records), computes per-field statistics, and generates a detailed data analysis report.
 
@@ -24,14 +24,15 @@ npm install
 
 # 2. Configure
 cp .env.example .env
-# Edit .env with your Airtable API key and base IDs
+# Edit .env — set AIRTABLE_API_KEY (required)
+# Optionally set AIRTABLE_BASE_IDS, or let the tool auto-discover your bases
 
 # 3. Run (choose one)
 npm run discover:schema    # Fast — schema only (seconds)
 npm run discover           # Full — schema + all records (minutes)
 
-# 4. Read the report
-cat data/AIRTABLE_REPORT.md
+# 4. Read the report (in data/<date>_<baseIds>/ subfolder)
+cat data/*/AIRTABLE_REPORT.md
 ```
 
 ## Two Modes
@@ -66,15 +67,23 @@ This project includes a Claude Code skill at `.claude/skills/airtable-discover/S
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `AIRTABLE_API_KEY` | Yes | Personal Access Token (`pat...`). [Create one here](https://airtable.com/create/tokens). Scopes: `schema.bases:read` (schema-only), add `data.records:read` (full) |
-| `AIRTABLE_BASE_IDS` | Yes | Comma-separated base IDs (`appXXX,appYYY`) |
+| `AIRTABLE_BASE_IDS` | No | Comma-separated base IDs (`appXXX,appYYY`). If omitted, the tool lists all bases available for the token and prompts you to choose. |
 | `AIRTABLE_USE_FIELD_IDS` | No | Set to `false` to use field names instead of IDs as record keys. Default: `true` |
 
 ## Output
 
-| File | Description |
-|------|-------------|
-| `data/AIRTABLE_REPORT.md` | Human-readable analysis (schema-only or full) |
-| `data/raw-schema.json` | Raw Airtable schema for reference |
+Each run creates a timestamped subfolder under `data/`:
+
+```
+data/
+  2025-01-15_0930_appXXX_appYYY/
+    AIRTABLE_REPORT.md    # Human-readable analysis
+    raw-schema.json       # Raw Airtable schema
+  2025-01-15_1415_appXXX_appYYY/
+    ...
+```
+
+Each run includes a timestamp (HHMM) so previous reports are never overwritten.
 
 ## Project Structure
 
