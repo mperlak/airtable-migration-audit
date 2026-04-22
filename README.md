@@ -1,13 +1,32 @@
-# Airtable Migration Audit by [straktur.com](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=readme-header)
+# Airtable Migration Audit
 
-Outgrowing Airtable? This tool tells you exactly what it takes to migrate. Point it at your bases and get a migration-readiness report: complexity verdict, schema recommendations, data quality blockers, and a concrete action plan.
+Scan your Airtable base and get a Postgres migration plan. Tells you what's in your base, what to clean up, and outputs a target Postgres schema with types, relationships, and import order.
 
-Works as a **CLI tool** or as an **AI agent skill** for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenAI Codex](https://openai.com/index/codex/), and other coding agents.
+**[→ See a live sample report](https://mperlak.github.io/airtable-migration-audit/examples/sample-report.html)** · Works as a CLI tool or as an AI agent skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenAI Codex](https://openai.com/index/codex/), and other coding agents.
 
-<img src="docs/screenshot-html-report.png" alt="HTML Report Preview" width="700">
+[![HTML Report Preview](https://github.com/mperlak/airtable-migration-audit/raw/main/docs/screenshot-html-report.png)](/mperlak/airtable-migration-audit/blob/main/docs/screenshot-html-report.png)
 
-> [!IMPORTANT]
 > **Runs locally.** Your Airtable data is fetched directly to your machine using your read-only token, analyzed locally, and written to local report files. Nothing is sent to a Straktur backend or any third-party service. You decide if and with whom you share the results.
+
+## Why this exists
+
+I've run [Mroomy](https://mroomy.com) for 6 years — we design children's rooms for customers across Poland and several European markets. Around 2,500 rooms designed, each with its own quirks, add-ons, and one-off decisions. The Airtable base we built along the way grew to 49,000+ records across multiple interconnected bases.
+
+When we finally decided to migrate off Airtable, the first question wasn't "how do I export the data." It was "what should I actually bring?"
+
+After 6 years of quick fixes, the base was a mess:
+
+- Fields added "just for now" that never got removed — including one literally named `Field 56`
+- SingleSelects that degenerated into comma-separated values — e.g. a choice named `PREMIUM, EXTRA_CHARGE` (package tier and a billing flag crammed into one select value because adding a new column felt like too much work at the time)
+- Text fields with 17 unique values across 1,500 records — obvious lookup-table candidates nobody had time to normalize
+- Linked records configured as single-link but actually used many-to-many
+- Automations referencing columns nobody remembered adding
+
+No existing tool gave me a full picture of what was worth migrating vs. what was dead weight. So I wrote one.
+
+This tool reads your Airtable base — schema *and* all records — and tells you what's in there before you touch anything. Null rates, cardinality, relationship patterns, dictionary candidates, duplicate-looking choices. Plus a `MIGRATION.json` with a target Postgres schema you can feed to an AI agent or implement manually.
+
+It doesn't move data. It tells you what to plan for.
 
 ## What it audits
 
@@ -107,7 +126,7 @@ Each run includes a timestamp (HHMM) so previous reports are never overwritten. 
 
 ### MIGRATION.json — ready-to-use PostgreSQL migration spec
 
-Generated in **full mode only** (requires record data for cardinality and validation analysis). This file is a framework-agnostic, machine-consumable PostgreSQL migration specification. Framework adapters (e.g. [Straktur](https://straktur.com?utm_source=airtable-migration-audit&utm_medium=github&utm_content=readme-migration-json), Prisma, Django) consume this file to scaffold target applications.
+Generated in **full mode only** (requires record data for cardinality and validation analysis). This file is a framework-agnostic, machine-consumable PostgreSQL migration specification. Framework adapters (e.g. [Straktur](https://straktur.com), Prisma, Django) consume this file to scaffold target applications.
 
 The JSON contains:
 
