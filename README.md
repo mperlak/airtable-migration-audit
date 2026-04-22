@@ -18,7 +18,7 @@ Works as a **CLI tool** or as an **AI agent skill** for [Claude Code](https://do
 
 ## Quick Start
 
-> 💡 **Want to see what the output looks like first?** Browse the [sample report](./examples/) — a real audit of a 7-table, 37k-record interior design base.
+> 💡 **Want to see what the output looks like first?** [View the interactive sample report →](https://mperlak.github.io/airtable-migration-audit/examples/sample-report.html) (7 tables, 37k records, 67 warnings)
 
 Requires [Node.js 18+](https://nodejs.org/) and npm.
 
