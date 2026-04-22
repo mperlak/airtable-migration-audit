@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airtable Migration Audit — Interior Design CRM</title>
+<style>
+
+:root {
+  --bg: #ffffff;
+  --bg-card: #f8f9fa;
+  --bg-sidebar: #1a1a2e;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --text-sidebar: #e2e8f0;
+  --border: #e5e7eb;
+  --accent: #6366f1;
+  --accent-light: #eef2ff;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "SF Mono", SFMono-Regular, ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --sidebar-w: 240px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --bg-sidebar: #0c0c1d;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --accent-light: #1e1b4b;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+}
+
+.light {
+  --bg: #ffffff;
+  --bg-card: #f8f9fa;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --accent-light: #eef2ff;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.dark {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-sidebar: #0c0c1d;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --accent-light: #1e1b4b;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  display: flex;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-sidebar);
+  color: var(--text-sidebar);
+  overflow-y: auto;
+  padding: 20px 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-brand {
+  padding: 0 20px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.9;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 6px 20px;
+  color: var(--text-sidebar);
+  text-decoration: none;
+  font-size: 13px;
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s;
+}
+.sidebar-link:hover, .sidebar-link.active { opacity: 1; background: rgba(255,255,255,0.08); }
+.sidebar-link-table { font-size: 12px; padding-left: 28px; }
+.sidebar-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 12px 20px; }
+.sidebar-label { padding: 4px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.5; }
+.sidebar-footer { margin-top: auto; padding: 12px 20px; }
+
+.theme-toggle {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: var(--text-sidebar);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.2); }
+
+.content {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  max-width: 960px;
+  padding: 40px 48px;
+}
+
+.header { margin-bottom: 40px; }
+.header-top { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+.header h1 { font-size: 28px; font-weight: 700; }
+.header-meta { font-size: 14px; color: var(--text-muted); }
+.header-meta code { font-family: var(--mono); font-size: 12px; background: var(--bg-card); padding: 2px 6px; border-radius: 4px; }
+.header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.header-sub a { color: var(--accent); text-decoration: none; }
+.trust-line { color: var(--green); font-size: 12px; }
+.verdict { font-size: 15px; color: var(--text); margin-top: 12px; line-height: 1.5; padding: 12px 16px; background: var(--bg-card); border-radius: var(--radius); border-left: 4px solid var(--accent); }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.badge-warn { background: var(--yellow); }
+.badge-info { background: var(--accent); font-size: 10px; padding: 1px 6px; }
+.badge-muted { background: var(--text-muted); font-size: 11px; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 16px 0 32px;
+}
+.cards-small { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.card-value { font-size: 28px; font-weight: 700; color: var(--accent); }
+.card-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+section { margin-bottom: 40px; }
+h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+h3 { font-size: 16px; font-weight: 600; margin: 20px 0 10px; }
+h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+h4 code { font-weight: 400; color: var(--text-muted); font-size: 12px; margin-left: 6px; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 8px 0 16px;
+}
+.data-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+.data-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.data-table code { font-family: var(--mono); font-size: 12px; background: var(--bg-card); padding: 1px 4px; border-radius: 3px; }
+.data-table-compact { font-size: 12px; }
+.data-table-compact td, .data-table-compact th { padding: 4px 10px; }
+tr.unused td { color: var(--text-muted); font-style: italic; }
+.high-null { color: var(--red); font-weight: 600; }
+.mid-null { color: var(--yellow); }
+
+.callout {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  margin: 12px 0;
+  border-left: 4px solid;
+}
+.callout-warn { background: #fef3c7; border-color: var(--yellow); color: #92400e; }
+.dark .callout-warn, :root:not(.light) .callout-warn { background: #422006; color: #fbbf24; }
+@media (prefers-color-scheme: light) { :root:not(.dark) .callout-warn { background: #fef3c7; color: #92400e; } }
+
+.table-section { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+.table-header {
+  font-size: 16px;
+  padding: 14px 20px;
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  user-select: none;
+  transition: background 0.15s;
+}
+.table-header:hover { background: var(--accent-light); }
+.collapse-icon { font-size: 12px; transition: transform 0.2s; width: 16px; }
+.table-header.open .collapse-icon { transform: rotate(90deg); }
+.table-meta { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-left: auto; }
+.table-body { padding: 20px; }
+.table-body.collapsed { display: none; }
+
+.field-detail {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.field-detail:last-child { border-bottom: none; }
+.field-stats { font-size: 13px; color: var(--text-muted); margin: 4px 0; }
+.field-stats strong { color: var(--text); }
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin: 6px 0;
+  overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+.flag {
+  font-size: 12px;
+  color: var(--yellow);
+  padding: 2px 0;
+  margin-top: 4px;
+}
+.flag::before { content: "⚠ "; }
+
+.footer {
+  margin-top: 60px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.footer a { color: var(--accent); text-decoration: none; }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .content { margin-left: 0; padding: 20px; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media print {
+  .sidebar { display: none; }
+  .content { margin-left: 0; max-width: 100%; }
+  .table-body.collapsed { display: block !important; }
+  .theme-toggle { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Straktur Audit
+  </div>
+  <a href="#summary" class="sidebar-link active">Summary</a>
+  <a href="#next-steps" class="sidebar-link">Next Steps</a>
+  <a href="#warnings" class="sidebar-link">Warnings</a>
+  <a href="#import-order" class="sidebar-link">Import Order</a>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label">Tables</div>
+  <a href="#table-tblH7KEpEcobTs49S" class="sidebar-link sidebar-link-table">Customers</a>
+  <a href="#table-tblSdYmRLaON1TzPB" class="sidebar-link sidebar-link-table">Customer Orders</a>
+  <a href="#table-tblSg3BjL0zjpw9jK" class="sidebar-link sidebar-link-table">Designed Interiors</a>
+  <a href="#table-tbl94C771ANGtmgxz" class="sidebar-link sidebar-link-table">Commissions</a>
+  <a href="#table-tbll0HM2n4QeRaDjd" class="sidebar-link sidebar-link-table">Stores</a>
+  <a href="#table-tbl4oUbOaDN7sbizJ" class="sidebar-link sidebar-link-table">Service Packages</a>
+  <a href="#table-tblG15dxwxRdXaXH9" class="sidebar-link sidebar-link-table">Contacts</a>
+  <div class="sidebar-footer">
+    <button onclick="toggleTheme()" class="theme-toggle" title="Toggle dark/light mode">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main class="content">
+
+<header class="header">
+  <div class="header-top">
+    <h1>Airtable Migration Audit</h1>
+    <span class="badge" style="background:var(--red)">High complexity</span>
+    <span class="badge" style="background:var(--accent)">Full analysis</span>
+  </div>
+  <p class="header-meta">
+    <strong>Interior Design CRM</strong> <code>apptmzouHnhyFTcGe</code>
+    &nbsp;·&nbsp; 2026-03-16 11:21:57
+  </p>
+  <p class="header-sub">by <a href="https://straktur.com?utm_source=airtable-migration-audit&amp;utm_medium=report&amp;utm_content=header" target="_blank">straktur.com</a> · <span class="trust-line">Runs locally · report stored on your machine</span></p>
+  <p class="verdict">High complexity migration. 7 tables, 37,688 records, 67 data quality issues to resolve first. 9 many-to-many relationships need junction tables. Circular dependencies detected — requires two-pass import.</p>
+</header>
+
+<!-- Summary -->
+<section id="summary">
+  <h2>Summary</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-value">7</div>
+      <div class="card-label">Tables</div>
+    </div>
+    <div class="card">
+      <div class="card-value">37,688</div>
+      <div class="card-label">Records</div>
+    </div>
+    <div class="card">
+      <div class="card-value">122</div>
+      <div class="card-label">Data fields</div>
+    </div>
+    <div class="card">
+      <div class="card-value">111</div>
+      <div class="card-label">Computed fields</div>
+    </div>
+    <div class="card">
+      <div class="card-value">12</div>
+      <div class="card-label">Relationships</div>
+    </div>
+    <div class="card">
+      <div class="card-value">37</div>
+      <div class="card-label">Select fields</div>
+    </div>
+    <div class="card">
+      <div class="card-value">67</div>
+      <div class="card-label">Warnings</div>
+    </div>
+  </div>
+</section>
+
+<!-- Next Steps -->
+<section id="next-steps">
+  <h2>Migration Readiness</h2>
+  <table class="data-table">
+    <tbody>
+      <tr><td>Tables to migrate</td><td><strong>7</strong> (7 with data, 0 empty)</td></tr>
+      <tr><td>Computed fields</td><td><strong>111</strong> — recreate as app logic</td></tr>
+      <tr><td>Select fields</td><td><strong>37</strong> → enum types or lookup tables</td></tr>
+      <tr><td>Relationships</td><td><strong>3</strong> Many-to-One (FK), <strong>9</strong> Many-to-Many (junction)</td></tr>
+      <tr><td>Data quality warnings</td><td><strong>67</strong> — fix before migrating</td></tr>
+      <tr><td>Circular dependencies</td><td>1</td></tr>
+      <tr><td>Cross-base links</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Recommended Target Schema</h3>
+  <div class="cards cards-small">
+    <div class="card"><div class="card-value">7</div><div class="card-label">Core tables</div></div>
+    <div class="card"><div class="card-value">9</div><div class="card-label">Junction tables</div></div>
+    <div class="card"><div class="card-value">17</div><div class="card-label">Lookup tables</div></div>
+    <div class="card"><div class="card-value">33</div><div class="card-label">Total tables</div></div>
+    <div class="card"><div class="card-value">3</div><div class="card-label">Foreign keys</div></div>
+  </div>
+</section>
+
+<!-- Warnings -->
+<section id="warnings">
+<h2>Data Quality Warnings <span class="badge badge-warn">67</span></h2>
+<h3>Data cleanup needed</h3>
+<table class="data-table">
+<thead><tr><th>Table</th><th>Field</th><th>Issue</th></tr></thead>
+<tbody>
+<tr><td>Customers</td><td>Region</td><td>Only 17 unique values across 1531 records — dictionary candidate</td></tr>
+<tr><td>Customers</td><td>Country</td><td>Only 8 unique values across 1531 records — dictionary candidate</td></tr>
+<tr><td>Customer Orders</td><td>Purchase Channel</td><td>Choice &quot;Promo&quot; used by only 2 record(s)</td></tr>
+<tr><td>Customer Orders</td><td>Notes</td><td>Only 7 unique values across 1759 records — dictionary candidate</td></tr>
+<tr><td>Customer Orders</td><td>Return Status</td><td>Single-value field — only value is &quot;Return&quot; (4 records, 100% null). Consider converting to boolean</td></tr>
+<tr><td>Customer Orders</td><td>Promotion</td><td>Choice &quot;1,300 Rooms Campaign&quot; used by only 2 record(s)</td></tr>
+<tr><td>Customer Orders</td><td>Promotion</td><td>Choice &quot;Flash Sale 20231203&quot; used by only 1 record(s)</td></tr>
+<tr><td>Customer Orders</td><td>Promotion</td><td>1 pair(s) of similar choices — possible duplicates/typos: &quot;Winter Break Discount 2024&quot; ≈ &quot;Winter Break Discount 2025&quot;</td></tr>
+<tr><td>Customer Orders</td><td>Mailing</td><td>Single-value field — only value is &quot;Post-order Survey&quot; (123 records, 93% null). Consider converting to boolean</td></tr>
+<tr><td>Designed Interiors</td><td>Lead Designer</td><td>Choice &quot;Designer M&quot; used by only 2 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>Lead Designer</td><td>Choice &quot;Designer N&quot; used by only 2 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>Lead Designer</td><td>Choice &quot;Designer O&quot; used by only 1 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>Type</td><td>Choice &quot;House&quot; used by only 2 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>Type</td><td>Choice &quot;Walk-in Closet&quot; used by only 2 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>Type</td><td>Choice &quot;Space Division&quot; used by only 1 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>Type</td><td>Choice &quot;Living Room with Kitchenette&quot; used by only 1 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>Type</td><td>Choice &quot;Laundry Room&quot; used by only 1 record(s)</td></tr>
+<tr><td>Designed Interiors</td><td>GSheets export</td><td>Constant field — all 1600 records have value &quot;Exported&quot;. Consider removing instead of migrating</td></tr>
+<tr><td>Designed Interiors</td><td>Promo Campaigns</td><td>Single-value field — only value is &quot;Partner1 221212&quot; (1 records, 100% null). Consider converting to boolean</td></tr>
+<tr><td>Designed Interiors</td><td>Contact Person</td><td>Single-value field — only value is &quot;Designer R&quot; (19 records, 99% null). Consider converting to boolean</td></tr>
+<tr><td>Designed Interiors</td><td>Email Sent</td><td>Single-value field — only value is &quot;Sent&quot; (33 records, 98% null). Consider converting to boolean</td></tr>
+<tr><td>Commissions</td><td>Notes</td><td>Only 5 unique values across 31898 records — dictionary candidate</td></tr>
+<tr><td>Stores</td><td>Billing Method/Invoice</td><td>Choice &quot;Commission-based&quot; used by only 2 record(s)</td></tr>
+<tr><td>Stores</td><td>Order Method S@S</td><td>Choice &quot;customer discount code&quot; used by only 2 record(s)</td></tr>
+<tr><td>Stores</td><td>Order Method S@S</td><td>Choice &quot;order form&quot; used by only 2 record(s)</td></tr>
+<tr><td>Stores</td><td>Order Method S@S</td><td>Choice &quot;proforma&quot; used by only 1 record(s)</td></tr>
+<tr><td>Stores</td><td>Offered Product Categories</td><td>Choice &quot;Mattresses&quot; used by only 2 record(s)</td></tr>
+<tr><td>Stores</td><td>Offered Product Categories</td><td>Choice &quot;Neon Signs&quot; used by only 1 record(s)</td></tr>
+<tr><td>Stores</td><td>Offered Product Categories</td><td>Choice &quot;Custom Blinds&quot; used by only 1 record(s)</td></tr>
+<tr><td>Stores</td><td>Offered Product Categories</td><td>Choice &quot;Flower Stands&quot; used by only 1 record(s)</td></tr>
+<tr><td>Stores</td><td>Store Products – Data</td><td>Only 1 unique values across 137 records — dictionary candidate</td></tr>
+<tr><td>Contacts</td><td>Topics</td><td>Choice &quot;Photo Request&quot; used by only 2 record(s)</td></tr>
+</tbody></table>
+<h3>Schema decisions</h3>
+<table class="data-table">
+<thead><tr><th>Table</th><th>Field</th><th>Issue</th></tr></thead>
+<tbody>
+<tr><td>Customers</td><td>Orders</td><td>Records have up to 5 links — Many-to-Many relationship</td></tr>
+<tr><td>Customer Orders</td><td>Customer</td><td>All records have 0-1 links — Many-to-One relationship (single FK)</td></tr>
+<tr><td>Customer Orders</td><td>Customer</td><td>AT configured as single-record link</td></tr>
+<tr><td>Customer Orders</td><td>Package</td><td>Records have up to 3 links — Many-to-Many relationship</td></tr>
+<tr><td>Customer Orders</td><td>Room Projects</td><td>Records have up to 10 links — Many-to-Many relationship</td></tr>
+<tr><td>Designed Interiors</td><td>Order</td><td>All records have 0-1 links — Many-to-One relationship (single FK)</td></tr>
+<tr><td>Designed Interiors</td><td>Order</td><td>AT configured as single-record link</td></tr>
+<tr><td>Designed Interiors</td><td>Commissions</td><td>Records have up to 88 links — Many-to-Many relationship</td></tr>
+<tr><td>Designed Interiors</td><td>All Contacts</td><td>Records have up to 4 links — Many-to-Many relationship</td></tr>
+<tr><td>Designed Interiors</td><td>Contact History</td><td>Max length 2687 chars — use text() instead of varchar()</td></tr>
+<tr><td>Designed Interiors</td><td>Planned Budget</td><td>Max length 580 chars — use text() instead of varchar()</td></tr>
+<tr><td>Commissions</td><td>Store</td><td>Records have up to 2 links — Many-to-Many relationship</td></tr>
+<tr><td>Commissions</td><td>SKU</td><td>Max length 360 chars — use text() instead of varchar()</td></tr>
+<tr><td>Commissions</td><td>Rooms</td><td>All records have 0-1 links — Many-to-One relationship (single FK)</td></tr>
+<tr><td>Commissions</td><td>Rooms</td><td>AT configured as single-record link</td></tr>
+<tr><td>Stores</td><td>Commissions</td><td>Records have up to 4651 links — Many-to-Many relationship</td></tr>
+<tr><td>Stores</td><td>Internal Notes</td><td>Max length 918 chars — use text() instead of varchar()</td></tr>
+<tr><td>Stores</td><td>Orders – Login Credentials</td><td>Max length 294 chars — use text() instead of varchar()</td></tr>
+<tr><td>Stores</td><td>Store Products – Data</td><td>Max length 264 chars — use text() instead of varchar()</td></tr>
+<tr><td>Service Packages</td><td>Customer Orders</td><td>Records have up to 775 links — Many-to-Many relationship</td></tr>
+<tr><td>Contacts</td><td>Notes</td><td>Max length 970 chars — use text() instead of varchar()</td></tr>
+<tr><td>Contacts</td><td>Interiors</td><td>Records have up to 4 links — Many-to-Many relationship</td></tr>
+</tbody></table>
+<h3>Low-priority cleanup</h3>
+<table class="data-table">
+<thead><tr><th>Table</th><th>Field</th><th>Issue</th></tr></thead>
+<tbody>
+<tr><td>Customer Orders</td><td>FB Review</td><td>1 defined choice(s) never used: No Response</td></tr>
+<tr><td>Customer Orders</td><td>Promotion</td><td>1 defined choice(s) never used: 20%</td></tr>
+<tr><td>Customer Orders</td><td>Mailing</td><td>1 defined choice(s) never used: Post-order Survey – to send</td></tr>
+<tr><td>Designed Interiors</td><td>Lead Designer</td><td>1 defined choice(s) never used: Unknown</td></tr>
+<tr><td>Designed Interiors</td><td>Type</td><td>3 defined choice(s) never used: Apartment, Dining Room, Guest Room</td></tr>
+<tr><td>Designed Interiors</td><td>Airtable Export</td><td>1 defined choice(s) never used: Designer S</td></tr>
+<tr><td>Designed Interiors</td><td>Delivered</td><td>1 defined choice(s) never used: No</td></tr>
+<tr><td>Designed Interiors</td><td>GSheets export</td><td>1 defined choice(s) never used: To Export</td></tr>
+<tr><td>Designed Interiors</td><td>Tags</td><td>2 defined choice(s) never used: BF 2023 (phone), BF 2025</td></tr>
+<tr><td>Designed Interiors</td><td>Email Sent</td><td>1 defined choice(s) never used: To Send</td></tr>
+<tr><td>Commissions</td><td>Paid</td><td>3 defined choice(s) never used: d,  (s)FS-60/06/2023/SEC, t</td></tr>
+<tr><td>Commissions</td><td>Designer Settlement Status</td><td>1 defined choice(s) never used: N/A</td></tr>
+<tr><td>Commissions</td><td>Field 43</td><td>All values are empty</td></tr>
+</tbody></table>
+</section>
+
+<!-- Import Order -->
+<section id="import-order">
+<h2>Import Order</h2>
+<table class="data-table">
+<thead><tr><th>#</th><th>Table</th><th>Records</th><th>Depends On</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Customers</strong></td><td>1,531</td><td>Customer Orders</td></tr>
+<tr><td>2</td><td><strong>Customer Orders</strong></td><td>1,759</td><td>Customers, Service Packages, Designed Interiors</td></tr>
+<tr><td>3</td><td><strong>Designed Interiors</strong></td><td>2,073</td><td>Customer Orders, Commissions, Contacts</td></tr>
+<tr><td>4</td><td><strong>Commissions</strong></td><td>31,898</td><td>Stores, Designed Interiors</td></tr>
+<tr><td>5</td><td><strong>Stores</strong></td><td>137</td><td>Commissions</td></tr>
+<tr><td>6</td><td><strong>Service Packages</strong></td><td>14</td><td>Customer Orders</td></tr>
+<tr><td>7</td><td><strong>Contacts</strong></td><td>276</td><td>Designed Interiors</td></tr>
+</tbody></table>
+<div class="callout callout-warn"><strong>Circular dependencies:</strong> Customers ↔ Customer Orders ↔ Service Packages ↔ Designed Interiors ↔ Contacts ↔ Commissions ↔ Stores. Import both without FK values, then resolve in a post-import pass.</div>
+</section>
+
+<!-- Per-table sections -->
+<section id="table-tblH7KEpEcobTs49S" class="table-section">
+<h2 class="table-header" onclick="toggleSection(this)">
+  <span class="collapse-icon">▸</span>
+  Customers
+  <span class="table-meta">1,531 records · 11 data fields · 0 computed</span>
+</h2>
+<div class="table-body collapsed"><h3>Fields Overview</h3>
+<table class="data-table">
+<thead><tr><th>#</th><th>Field</th><th>Type</th><th>Null%</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Name</strong> <span class="badge badge-info">PK</span></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>2</td><td><strong>First Name</strong></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>3</td><td><strong>Last Name</strong></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>4</td><td><strong>Orders</strong></td><td><code>linkedRecord → Customer Orders</code></td><td class="">1%</td><td>Up to 5 links → M2M</td></tr>
+<tr><td>5</td><td><strong>Email</strong></td><td><code>email</code></td><td class="">0%</td><td></td></tr>
+<tr><td>6</td><td><strong>Phone</strong></td><td><code>phoneNumber</code></td><td class="">10%</td><td></td></tr>
+<tr><td>7</td><td><strong>Address</strong></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>8</td><td><strong>City</strong></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>9</td><td><strong>Postal Code</strong></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>10</td><td><strong>Region</strong></td><td><code>singleLineText</code></td><td class="">0%</td><td>17 unique — dictionary?</td></tr>
+<tr><td>11</td><td><strong>Country</strong></td><td><code>singleLineText</code></td><td class="">0%</td><td>8 unique — dictionary?</td></tr>
+</tbody></table>
+<h3>Field Details</h3>
+<div class="field-detail">
+<h4>Name <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 0 (0%) · Unique: 1,503 · Length: 6–34 (avg 16)</div>
+</div>
+<div class="field-detail">
+<h4>First Name <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 0 (0%) · Unique: 239 · Length: 3–12 (avg 7)</div>
+</div>
+<div class="field-detail">
+<h4>Last Name <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 0 (0%) · Unique: 1,392 · Length: 1–24 (avg 9)</div>
+</div>
+<div class="field-detail">
+<h4>Orders <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Customer Orders</strong> · 0 links: 1% · 1 link: 86% · 2+ links: 13% · Max: 5</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 5 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>Email <code>email</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 3 (0%) · Unique: 1,527 · Length: 9–39 (avg 22)</div>
+</div>
+<div class="field-detail">
+<h4>Phone <code>phoneNumber</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 146 (10%) · Unique: 1,368 · Length: 8–19 (avg 9)</div>
+</div>
+<div class="field-detail">
+<h4>Address <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 3 (0%) · Unique: 1,493 · Length: 3–62 (avg 14)</div>
+</div>
+<div class="field-detail">
+<h4>City <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 3 (0%) · Unique: 630 · Length: 3–44 (avg 8)</div>
+</div>
+<div class="field-detail">
+<h4>Postal Code <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 3 (0%) · Unique: 1,075 · Length: 5–8 (avg 6)</div>
+</div>
+<div class="field-detail">
+<h4>Region <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 7 (0%) · Unique: 17 · Length: 3–19 (avg 11)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>mazowieckie</td><td>538</td></tr>
+<tr><td>małopolskie</td><td>173</td></tr>
+<tr><td>dolnośląskie</td><td>121</td></tr>
+<tr><td>wielkopolskie</td><td>112</td></tr>
+<tr><td>śląskie</td><td>112</td></tr>
+<tr><td>pomorskie</td><td>90</td></tr>
+<tr><td>łódzkie</td><td>88</td></tr>
+<tr><td>zachodniopomorskie</td><td>44</td></tr>
+<tr><td>lubelskie</td><td>42</td></tr>
+<tr><td>lubuskie</td><td>32</td></tr>
+</tbody></table>
+<div class="flag">Only 17 unique values across 1531 records — dictionary candidate</div>
+</div>
+<div class="field-detail">
+<h4>Country <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,531 · Null: 3 (0%) · Unique: 8 · Length: 2–6 (avg 2)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>PL</td><td>1,498</td></tr>
+<tr><td>DE</td><td>16</td></tr>
+<tr><td>GB</td><td>7</td></tr>
+<tr><td>NL</td><td>2</td></tr>
+<tr><td>Poland</td><td>2</td></tr>
+<tr><td>CH</td><td>1</td></tr>
+<tr><td>PF</td><td>1</td></tr>
+<tr><td>IE</td><td>1</td></tr>
+</tbody></table>
+<div class="flag">Only 8 unique values across 1531 records — dictionary candidate</div>
+</div>
+</div></section>
+<section id="table-tblSdYmRLaON1TzPB" class="table-section">
+<h2 class="table-header" onclick="toggleSection(this)">
+  <span class="collapse-icon">▸</span>
+  Customer Orders
+  <span class="table-meta">1,759 records · 15 data fields · 19 computed</span>
+</h2>
+<div class="table-body collapsed">
+<h3>Fields Overview</h3>
+<table class="data-table">
+<thead><tr><th>#</th><th>Field</th><th>Type</th><th>Null%</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Order Number</strong> <span class="badge badge-info">PK</span></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>2</td><td><strong>Customer</strong></td><td><code>linkedRecord → Customers</code></td><td class="">0%</td><td>100% 0-1 links → M2O</td></tr>
+<tr><td>3</td><td><strong>Quantity</strong></td><td><code>number</code></td><td class="">0%</td><td>All integers · 0–12</td></tr>
+<tr><td>4</td><td><strong>Purchase Date</strong></td><td><code>date</code></td><td class="">0%</td><td>2017-10-07 → 2026-03-09</td></tr>
+<tr><td>5</td><td><strong>Purchase Channel</strong></td><td><code>singleSelect</code></td><td class="mid-null">30%</td><td>4 choices (4 used)</td></tr>
+<tr><td>6</td><td><strong>Discount</strong></td><td><code>number</code></td><td class="">13%</td><td>0–100</td></tr>
+<tr><td>7</td><td><strong>Notes</strong></td><td><code>multilineText</code></td><td class="high-null">100%</td><td>7 unique — dictionary?</td></tr>
+<tr><td>8</td><td><strong>Order Total</strong></td><td><code>number</code></td><td class="">0%</td><td>0–26,000</td></tr>
+<tr><td>9</td><td><strong>Package</strong></td><td><code>linkedRecord → Service Packages</code></td><td class="mid-null">40%</td><td>Up to 3 links → M2M</td></tr>
+<tr><td>10</td><td><strong>Invoice Number</strong></td><td><code>singleLineText</code></td><td class="high-null">88%</td><td></td></tr>
+<tr><td>11</td><td><strong>Room Projects</strong></td><td><code>linkedRecord → Designed Interiors</code></td><td class="">2%</td><td>Up to 10 links → M2M</td></tr>
+<tr><td>12</td><td><strong>FB Review</strong></td><td><code>singleSelect</code></td><td class="high-null">68%</td><td>4 choices (3 used)</td></tr>
+<tr><td>13</td><td><strong>Return Status</strong></td><td><code>singleSelect</code></td><td class="high-null">100%</td><td>1 choices (1 used)</td></tr>
+<tr><td>14</td><td><strong>Promotion</strong></td><td><code>singleSelect</code></td><td class="high-null">84%</td><td>23 choices (22 used)</td></tr>
+<tr><td>15</td><td><strong>Mailing</strong></td><td><code>multipleSelects</code></td><td class="high-null">93%</td><td>2 choices (1 used)</td></tr>
+</tbody></table>
+<h3>Computed Fields <span class="badge badge-muted">19 — skip during import</span></h3>
+<table class="data-table">
+<thead><tr><th>Field</th><th>Type</th><th>Result</th><th>Recreate As</th></tr></thead>
+<tbody>
+<tr><td>Purchase Month</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Order Value (net)</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Packages (products)</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Shopping List Value</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Paid Commissions</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Unpaid Commissions</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>All Commissions Value</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Year</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Region</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>City</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>Country</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>Phone</td><td><code>multipleLookupValues</code></td><td>phoneNumber</td><td>SQL JOIN</td></tr>
+<tr><td>Email</td><td><code>multipleLookupValues</code></td><td>email</td><td>SQL JOIN</td></tr>
+<tr><td>Current Month</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Current Month v2</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Average Price per Project</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>First Name</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Last Name</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Completed Orders</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+</tbody></table>
+<h3>Field Details</h3>
+<div class="field-detail">
+<h4>Order Number <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1 (0%) · Unique: 1,754 · Length: 5–10 (avg 5)</div>
+</div>
+<div class="field-detail">
+<h4>Customer <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Customers</strong> · 0 links: 0% · 1 link: 100% · 2+ links: 0%</div>
+<div class="field-stats"><strong>→ Many-to-One (FK)</strong></div>
+<div class="flag">All records have 0-1 links — Many-to-One relationship (single FK)</div>
+<div class="flag">AT configured as single-record link</div>
+</div>
+<div class="field-detail">
+<h4>Quantity <code>number</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1 (0%) · Range: 0–12 · Avg: 1.17 · Median: 1 · All integers</div>
+<div class="flag">All values are integers</div>
+</div>
+<div class="field-detail">
+<h4>Purchase Date <code>date</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1 (0%) · Range: 2017-10-07 → 2026-03-09</div>
+</div>
+<div class="field-detail">
+<h4>Purchase Channel <code>singleSelect</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 525 (30%) · 4 choices (4 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>WooCommerce</td><td>1,038</td><td>84%</td></tr>
+<tr><td>Shoplo</td><td>161</td><td>13%</td></tr>
+<tr><td>Direct</td><td>33</td><td>3%</td></tr>
+<tr><td>Promo</td><td>2</td><td>0%</td></tr>
+</tbody></table>
+<div class="flag">Choice &quot;Promo&quot; used by only 2 record(s)</div>
+</div>
+<div class="field-detail">
+<h4>Discount <code>number</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 228 (13%) · Range: 0–100 · Avg: 6.42 · Median: 0 · Up to 2 decimals</div>
+</div>
+<div class="field-detail">
+<h4>Notes <code>multilineText</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1,752 (100%) · Unique: 7 · Length: 14–53 (avg 31)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>Mutual contract withdrawal - money refunded to customer</td><td>1</td></tr>
+<tr><td>Changes made to project</td><td>1</td></tr>
+<tr><td>Smart Institute</td><td>1</td></tr>
+<tr><td>Completion of non-children's room
+</td><td>1</td></tr>
+<tr><td>Additional changes in project</td><td>1</td></tr>
+<tr><td>We withdrew from contract due to missing measurements</td><td>1</td></tr>
+<tr><td>Foundation auction
+</td><td>1</td></tr>
+</tbody></table>
+<div class="flag">Only 7 unique values across 1759 records — dictionary candidate</div>
+<div class="flag">100% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Order Total <code>number</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 3 (0%) · Range: 0–26000 · Avg: 2501.8 · Median: 1996 · Up to 2 decimals</div>
+</div>
+<div class="field-detail">
+<h4>Package <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Service Packages</strong> · 0 links: 40% · 1 link: 53% · 2+ links: 7% · Max: 3</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 3 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>Invoice Number <code>singleLineText</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1,540 (88%) · Unique: 209 · Length: 4–10 (avg 10)</div>
+<div class="flag">88% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Room Projects <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Designed Interiors</strong> · 0 links: 2% · 1 link: 82% · 2+ links: 16% · Max: 10</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 10 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>FB Review <code>singleSelect</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1,200 (68%) · 4 choices (3 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Request Sent</td><td>380</td><td>68%</td></tr>
+<tr><td>Received</td><td>149</td><td>27%</td></tr>
+<tr><td>DO NOT SEND</td><td>30</td><td>5%</td></tr>
+<tr class="unused"><td>No Response</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: No Response</div>
+</div>
+<div class="field-detail">
+<h4>Return Status <code>singleSelect</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1,755 (100%) · 1 choices (1 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Return</td><td>4</td><td>100%</td></tr>
+</tbody></table>
+<div class="flag">Single-value field — only value is &quot;Return&quot; (4 records, 100% null). Consider converting to boolean</div>
+</div>
+<div class="field-detail">
+<h4>Promotion <code>singleSelect</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1,479 (84%) · 23 choices (22 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Project Sale 2025</td><td>31</td><td>11%</td></tr>
+<tr><td>Project Sale 202312</td><td>30</td><td>11%</td></tr>
+<tr><td>FinalSale24</td><td>25</td><td>9%</td></tr>
+<tr><td>1,500 Projects Campaign</td><td>25</td><td>9%</td></tr>
+<tr><td>5-Year Anniversary</td><td>19</td><td>7%</td></tr>
+<tr><td>BlackWeek2024</td><td>15</td><td>5%</td></tr>
+<tr><td>Spring Promo 2024</td><td>14</td><td>5%</td></tr>
+<tr><td>Winter Sale Finale 2024</td><td>13</td><td>5%</td></tr>
+<tr><td>FALL20</td><td>13</td><td>5%</td></tr>
+<tr><td>SPRING25</td><td>12</td><td>4%</td></tr>
+<tr><td>Autumn Design 2024</td><td>12</td><td>4%</td></tr>
+<tr><td>Spring Discounts 2024</td><td>12</td><td>4%</td></tr>
+<tr><td>Winter Break Discount 2024</td><td>11</td><td>4%</td></tr>
+<tr><td>BF 2023</td><td>9</td><td>3%</td></tr>
+<tr><td>June Promo 2024</td><td>8</td><td>3%</td></tr>
+<tr><td>Winter Break Discount 2025</td><td>7</td><td>3%</td></tr>
+<tr><td>NOW20</td><td>7</td><td>3%</td></tr>
+<tr><td>DREAMS20</td><td>6</td><td>2%</td></tr>
+<tr><td>OCT17</td><td>5</td><td>2%</td></tr>
+<tr><td>For Her For Him 2024</td><td>3</td><td>1%</td></tr>
+<tr><td>1,300 Rooms Campaign</td><td>2</td><td>1%</td></tr>
+<tr><td>Flash Sale 20231203</td><td>1</td><td>0%</td></tr>
+<tr class="unused"><td>20%</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: 20%</div>
+<div class="flag">Choice &quot;1,300 Rooms Campaign&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;Flash Sale 20231203&quot; used by only 1 record(s)</div>
+<div class="flag">1 pair(s) of similar choices — possible duplicates/typos: &quot;Winter Break Discount 2024&quot; ≈ &quot;Winter Break Discount 2025&quot;</div>
+</div>
+<div class="field-detail">
+<h4>Mailing <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 1,759 · Null: 1,636 (93%) · 2 choices (1 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Post-order Survey</td><td>123</td><td>100%</td></tr>
+<tr class="unused"><td>Post-order Survey – to send</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: Post-order Survey – to send</div>
+<div class="flag">Single-value field — only value is &quot;Post-order Survey&quot; (123 records, 93% null). Consider converting to boolean</div>
+</div>
+</div></section>
+<section id="table-tblSg3BjL0zjpw9jK" class="table-section">
+<h2 class="table-header" onclick="toggleSection(this)">
+  <span class="collapse-icon">▸</span>
+  Designed Interiors
+  <span class="table-meta">2,073 records · 42 data fields · 51 computed</span>
+</h2>
+<div class="table-body collapsed">
+<h3>Fields Overview</h3>
+<table class="data-table">
+<thead><tr><th>#</th><th>Field</th><th>Type</th><th>Null%</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Children Names</strong></td><td><code>singleLineText</code></td><td class="">8%</td><td></td></tr>
+<tr><td>2</td><td><strong>Children Ages</strong></td><td><code>singleLineText</code></td><td class="">8%</td><td></td></tr>
+<tr><td>3</td><td><strong>Lead Designer</strong></td><td><code>singleSelect</code></td><td class="">6%</td><td>16 choices (15 used)</td></tr>
+<tr><td>4</td><td><strong>Type</strong></td><td><code>singleSelect</code></td><td class="">0%</td><td>17 choices (14 used)</td></tr>
+<tr><td>5</td><td><strong>Airtable Export</strong></td><td><code>singleSelect</code></td><td class="mid-null">21%</td><td>3 choices (2 used)</td></tr>
+<tr><td>6</td><td><strong>Package (Product)</strong></td><td><code>singleSelect</code></td><td class="">3%</td><td>6 choices (6 used)</td></tr>
+<tr><td>7</td><td><strong>Order</strong></td><td><code>linkedRecord → Customer Orders</code></td><td class="">0%</td><td>100% 0-1 links → M2O</td></tr>
+<tr><td>8</td><td><strong>Delivered</strong></td><td><code>singleSelect</code></td><td class="">4%</td><td>3 choices (2 used)</td></tr>
+<tr><td>9</td><td><strong>Shopping List Value</strong></td><td><code>currency</code></td><td class="">8%</td><td>419–73,010.9</td></tr>
+<tr><td>10</td><td><strong>Commissions</strong></td><td><code>linkedRecord → Commissions</code></td><td class="">7%</td><td>Up to 88 links → M2M</td></tr>
+<tr><td>11</td><td><strong>Room Completion</strong></td><td><code>singleSelect</code></td><td class="high-null">83%</td><td>5 choices (5 used)</td></tr>
+<tr><td>12</td><td><strong>Delivery Date</strong></td><td><code>date</code></td><td class="">6%</td><td>2018-04-06 → 2026-03-10</td></tr>
+<tr><td>13</td><td><strong>Building Type</strong></td><td><code>singleSelect</code></td><td class="">5%</td><td>2 choices (2 used)</td></tr>
+<tr><td>14</td><td><strong>Room Condition</strong></td><td><code>singleSelect</code></td><td class="">5%</td><td>3 choices (3 used)</td></tr>
+<tr><td>15</td><td><strong>Room No. (autonumber)</strong></td><td><code>autoNumber</code></td><td class="">—</td><td>All integers · 1–2,132</td></tr>
+<tr><td>16</td><td><strong>WordPress Project No. (old)</strong></td><td><code>singleLineText</code></td><td class="high-null">93%</td><td></td></tr>
+<tr><td>17</td><td><strong>All Contacts</strong></td><td><code>linkedRecord → Contacts</code></td><td class="high-null">89%</td><td>Up to 4 links → M2M</td></tr>
+<tr><td>18</td><td><strong>Rooms Count</strong></td><td><code>number</code></td><td class="">16%</td><td>All integers · 1–1</td></tr>
+<tr><td>19</td><td><strong>GSheets export</strong></td><td><code>singleSelect</code></td><td class="mid-null">23%</td><td>2 choices (1 used)</td></tr>
+<tr><td>20</td><td><strong>Shopping List</strong></td><td><code>url</code></td><td class="mid-null">23%</td><td></td></tr>
+<tr><td>21</td><td><strong>Survey Link</strong></td><td><code>url</code></td><td class="mid-null">34%</td><td></td></tr>
+<tr><td>22</td><td><strong>Area (m²)</strong></td><td><code>number</code></td><td class="mid-null">40%</td><td>0–54</td></tr>
+<tr><td>23</td><td><strong>Contact Status</strong></td><td><code>singleSelect</code></td><td class="high-null">71%</td><td>4 choices (4 used)</td></tr>
+<tr><td>24</td><td><strong>Next Contact Date</strong></td><td><code>date</code></td><td class="high-null">90%</td><td>2022-12-06 → 2026-08-10</td></tr>
+<tr><td>25</td><td><strong>Promo Campaigns</strong></td><td><code>multipleSelects</code></td><td class="high-null">100%</td><td>1 choices (1 used)</td></tr>
+<tr><td>26</td><td><strong>Shopping List Expiry</strong></td><td><code>date</code></td><td class="mid-null">41%</td><td>2022-01-31 → 2026-04-10</td></tr>
+<tr><td>27</td><td><strong>Free Shipping Until</strong></td><td><code>date</code></td><td class="mid-null">41%</td><td>2021-10-12 → 2026-03-17</td></tr>
+<tr><td>28</td><td><strong>Contact History</strong></td><td><code>richText</code></td><td class="mid-null">48%</td><td>Max 2,687 chars</td></tr>
+<tr><td>29</td><td><strong>Promo Campaign</strong></td><td><code>multipleSelects</code></td><td class="high-null">98%</td><td>2 choices (2 used)</td></tr>
+<tr><td>30</td><td><strong>Contact Date (auto)</strong></td><td><code>lastModifiedTime</code></td><td class="mid-null">—</td><td>2022-12-12 → 2026-03-16</td></tr>
+<tr><td>31</td><td><strong>Contact After Delivery</strong></td><td><code>checkbox</code></td><td class="">0%</td><td>10% checked</td></tr>
+<tr><td>32</td><td><strong>Free Shipping Notice</strong></td><td><code>checkbox</code></td><td class="">0%</td><td>7% checked</td></tr>
+<tr><td>33</td><td><strong>Contact re List End</strong></td><td><code>checkbox</code></td><td class="">0%</td><td>2% checked</td></tr>
+<tr><td>34</td><td><strong>Contact Person</strong></td><td><code>singleSelect</code></td><td class="high-null">99%</td><td>1 choices (1 used)</td></tr>
+<tr><td>35</td><td><strong>Tags</strong></td><td><code>multipleSelects</code></td><td class="high-null">94%</td><td>6 choices (4 used)</td></tr>
+<tr><td>36</td><td><strong>Email Sent</strong></td><td><code>singleSelect</code></td><td class="high-null">98%</td><td>2 choices (1 used)</td></tr>
+<tr><td>37</td><td><strong>Automated Emails</strong></td><td><code>multipleSelects</code></td><td class="high-null">72%</td><td>6 choices (6 used)</td></tr>
+<tr><td>38</td><td><strong>Contact Status (new)</strong></td><td><code>singleSelect</code></td><td class="high-null">70%</td><td>7 choices (7 used)</td></tr>
+<tr><td>39</td><td><strong>Planned Renovation Date</strong></td><td><code>date</code></td><td class="high-null">85%</td><td>2024-09-13 → 2026-11-16</td></tr>
+<tr><td>40</td><td><strong>Notes</strong></td><td><code>richText</code></td><td class="high-null">98%</td><td></td></tr>
+<tr><td>41</td><td><strong>Planned Budget</strong></td><td><code>singleLineText</code></td><td class="high-null">77%</td><td>Max 580 chars</td></tr>
+<tr><td>42</td><td><strong>Modified At (Airtable Export)</strong></td><td><code>lastModifiedTime</code></td><td class="mid-null">—</td><td>2020-09-02 → 2026-03-10</td></tr>
+</tbody></table>
+<h3>Computed Fields <span class="badge badge-muted">51 — skip during import</span></h3>
+<table class="data-table">
+<thead><tr><th>Field</th><th>Type</th><th>Result</th><th>Recreate As</th></tr></thead>
+<tbody>
+<tr><td>Room Number</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Order Number EXP</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>WordPress Current Project Number</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Order Date</td><td><code>multipleLookupValues</code></td><td>date</td><td>SQL JOIN</td></tr>
+<tr><td>Children Count</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Customer</td><td><code>multipleLookupValues</code></td><td>multipleRecordLinks</td><td>SQL JOIN</td></tr>
+<tr><td>Package</td><td><code>multipleLookupValues</code></td><td>multipleRecordLinks</td><td>SQL JOIN</td></tr>
+<tr><td>Commission Shopping List (net)</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Potential Commissions Value</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Commission Products Share (net)</td><td><code>formula</code></td><td>percent</td><td>App logic or generated column</td></tr>
+<tr><td>Commissions to Total Purchases</td><td><code>formula</code></td><td>percent</td><td>App logic or generated column</td></tr>
+<tr><td>Purchase Month</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Paid Commissions</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Likely Revenue &gt;90%</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Completion Status (by paid invoices)</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Commissions Completed (%)</td><td><code>formula</code></td><td>percent</td><td>App logic or generated column</td></tr>
+<tr><td>Region</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>City</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>Commissions Paid to Designer</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Interior_No</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Paid Commissions Amount</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Commissions Paid/To Pay (net)</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Phone</td><td><code>multipleLookupValues</code></td><td>phoneNumber</td><td>SQL JOIN</td></tr>
+<tr><td>Email</td><td><code>multipleLookupValues</code></td><td>email</td><td>SQL JOIN</td></tr>
+<tr><td>Delivery Month</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Contacts Count (all)</td><td><code>count</code></td><td>—</td><td>SQL COUNT or app logic</td></tr>
+<tr><td>Commissions to Allocate</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>FB Review</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Carpenter</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Express</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Interior_No_wordpress_current</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Commissions for Designer</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Completed Orders (net)</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Free Shipping</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>First Purchase Date</td><td><code>rollup</code></td><td>date</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Discount</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Paid Commissions (net)</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Shopping List (net)</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Potential Commissions (net)</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Commissions Completed Net (%)</td><td><code>formula</code></td><td>percent</td><td>App logic or generated column</td></tr>
+<tr><td>Completed Orders Net (%)</td><td><code>formula</code></td><td>percent</td><td>App logic or generated column</td></tr>
+<tr><td>Completion Started (by paid invoices)</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Free Shipping Ends in x Days</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Package Price</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Shopping List Expiry End</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Customer EXP</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Purchase Year</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Delivery Year</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Delivery Date (for Rollup)</td><td><code>formula</code></td><td>date</td><td>App logic or generated column</td></tr>
+<tr><td>Delivery Week</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Planned Budget (numeric)</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+</tbody></table>
+<h3>Field Details</h3>
+<div class="field-detail">
+<h4>Children Names <code>singleLineText</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 161 (8%) · Unique: 845 · Length: 3–66 (avg 8)</div>
+</div>
+<div class="field-detail">
+<h4>Children Ages <code>singleLineText</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 167 (8%) · Unique: 168 · Length: 1–9 (avg 2)</div>
+</div>
+<div class="field-detail">
+<h4>Lead Designer <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 125 (6%) · 16 choices (15 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Designer A</td><td>611</td><td>31%</td></tr>
+<tr><td>Designer B</td><td>363</td><td>19%</td></tr>
+<tr><td>Designer C</td><td>264</td><td>14%</td></tr>
+<tr><td>Designer D</td><td>229</td><td>12%</td></tr>
+<tr><td>Designer E</td><td>213</td><td>11%</td></tr>
+<tr><td>Designer F</td><td>123</td><td>6%</td></tr>
+<tr><td>Designer G</td><td>62</td><td>3%</td></tr>
+<tr><td>Designer H</td><td>29</td><td>1%</td></tr>
+<tr><td>Designer I</td><td>16</td><td>1%</td></tr>
+<tr><td>Designer J</td><td>15</td><td>1%</td></tr>
+<tr><td>Designer K</td><td>15</td><td>1%</td></tr>
+<tr><td>Designer L</td><td>3</td><td>0%</td></tr>
+<tr><td>Designer M</td><td>2</td><td>0%</td></tr>
+<tr><td>Designer N</td><td>2</td><td>0%</td></tr>
+<tr><td>Designer O</td><td>1</td><td>0%</td></tr>
+<tr class="unused"><td>Unknown</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: Unknown</div>
+<div class="flag">Choice &quot;Designer M&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;Designer N&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;Designer O&quot; used by only 1 record(s)</div>
+</div>
+<div class="field-detail">
+<h4>Type <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 9 (0%) · 17 choices (14 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Children's Room</td><td>1,937</td><td>94%</td></tr>
+<tr><td>Bedroom</td><td>32</td><td>2%</td></tr>
+<tr><td>Living Room</td><td>24</td><td>1%</td></tr>
+<tr><td>Office</td><td>19</td><td>1%</td></tr>
+<tr><td>Bathroom</td><td>14</td><td>1%</td></tr>
+<tr><td>Entryway</td><td>10</td><td>0%</td></tr>
+<tr><td>Living Room</td><td>10</td><td>0%</td></tr>
+<tr><td>Kitchen</td><td>8</td><td>0%</td></tr>
+<tr><td>Hallway</td><td>3</td><td>0%</td></tr>
+<tr><td>House</td><td>2</td><td>0%</td></tr>
+<tr><td>Walk-in Closet</td><td>2</td><td>0%</td></tr>
+<tr><td>Space Division</td><td>1</td><td>0%</td></tr>
+<tr><td>Living Room with Kitchenette</td><td>1</td><td>0%</td></tr>
+<tr><td>Laundry Room</td><td>1</td><td>0%</td></tr>
+<tr class="unused"><td>Apartment</td><td>0</td><td>0% — never used</td></tr>
+<tr class="unused"><td>Dining Room</td><td>0</td><td>0% — never used</td></tr>
+<tr class="unused"><td>Guest Room</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">3 defined choice(s) never used: Apartment, Dining Room, Guest Room</div>
+<div class="flag">Choice &quot;House&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;Walk-in Closet&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;Space Division&quot; used by only 1 record(s)</div>
+<div class="flag">Choice &quot;Living Room with Kitchenette&quot; used by only 1 record(s)</div>
+<div class="flag">Choice &quot;Laundry Room&quot; used by only 1 record(s)</div>
+</div>
+<div class="field-detail">
+<h4>Airtable Export <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 433 (21%) · 3 choices (2 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Exported</td><td>1,635</td><td>100%</td></tr>
+<tr><td>To Export</td><td>5</td><td>0%</td></tr>
+<tr class="unused"><td>Designer S</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: Designer S</div>
+</div>
+<div class="field-detail">
+<h4>Package (Product) <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 52 (3%) · 6 choices (6 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>PREMIUM</td><td>1,131</td><td>56%</td></tr>
+<tr><td>PREMIUM+</td><td>363</td><td>18%</td></tr>
+<tr><td>ONE</td><td>277</td><td>14%</td></tr>
+<tr><td>GO</td><td>120</td><td>6%</td></tr>
+<tr><td>OTHER</td><td>83</td><td>4%</td></tr>
+<tr><td>SMART</td><td>47</td><td>2%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Order <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Customer Orders</strong> · 0 links: 0% · 1 link: 100% · 2+ links: 0%</div>
+<div class="field-stats"><strong>→ Many-to-One (FK)</strong></div>
+<div class="flag">All records have 0-1 links — Many-to-One relationship (single FK)</div>
+<div class="flag">AT configured as single-record link</div>
+</div>
+<div class="field-detail">
+<h4>Delivered <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 90 (4%) · 3 choices (2 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Yes</td><td>1,950</td><td>98%</td></tr>
+<tr><td>Cancelled</td><td>33</td><td>2%</td></tr>
+<tr class="unused"><td>No</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: No</div>
+</div>
+<div class="field-detail">
+<h4>Shopping List Value <code>currency</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 159 (8%) · Range: 419–73010.9 · Avg: 18123.1 · Median: 17152.4 · Up to 2 decimals</div>
+</div>
+<div class="field-detail">
+<h4>Commissions <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Commissions</strong> · 0 links: 7% · 1 link: 1% · 2+ links: 92% · Max: 88</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 88 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>Room Completion <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,723 (83%) · 5 choices (5 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Completed</td><td>138</td><td>39%</td></tr>
+<tr><td>In Progress</td><td>120</td><td>34%</td></tr>
+<tr><td>Will be Implemented</td><td>72</td><td>21%</td></tr>
+<tr><td>Not Completed</td><td>16</td><td>5%</td></tr>
+<tr><td>No Info</td><td>4</td><td>1%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Delivery Date <code>date</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 126 (6%) · Range: 2018-04-06 → 2026-03-10</div>
+</div>
+<div class="field-detail">
+<h4>Building Type <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 103 (5%) · 2 choices (2 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>House</td><td>1,277</td><td>65%</td></tr>
+<tr><td>Apartment</td><td>693</td><td>35%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Room Condition <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 103 (5%) · 3 choices (3 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Renovation</td><td>1,404</td><td>71%</td></tr>
+<tr><td>Developer Finish</td><td>399</td><td>20%</td></tr>
+<tr><td>Shell Stage</td><td>167</td><td>8%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Room No. (autonumber) <code>autoNumber</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 0 (0%) · Range: 1–2132 · Avg: 1056.05 · Median: 1055 · All integers</div>
+<div class="flag">All values are integers</div>
+</div>
+<div class="field-detail">
+<h4>WordPress Project No. (old) <code>singleLineText</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,924 (93%) · Unique: 149 · Length: 2–3 (avg 2)</div>
+<div class="flag">93% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>All Contacts <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Contacts</strong> · 0 links: 89% · 1 link: 7% · 2+ links: 4% · Max: 4</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 4 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>Rooms Count <code>number</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 329 (16%) · Range: 1–1 · Avg: 1 · Median: 1 · All integers</div>
+<div class="flag">All values are integers</div>
+</div>
+<div class="field-detail">
+<h4>GSheets export <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 473 (23%) · 2 choices (1 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Exported</td><td>1,600</td><td>100%</td></tr>
+<tr class="unused"><td>To Export</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: To Export</div>
+<div class="flag">Constant field — all 1600 records have value &quot;Exported&quot;. Consider removing instead of migrating</div>
+</div>
+<div class="field-detail">
+<h4>Shopping List <code>url</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 473 (23%) · Unique: 1,600 · Length: 115–146 (avg 120)</div>
+</div>
+<div class="field-detail">
+<h4>Survey Link <code>url</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 696 (34%) · Unique: 1,371 · Length: 3–146 (avg 118)</div>
+</div>
+<div class="field-detail">
+<h4>Area (m²) <code>number</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 820 (40%) · Range: 0–54 · Avg: 15.13 · Median: 13.8 · Up to 2 decimals</div>
+</div>
+<div class="field-detail">
+<h4>Contact Status <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,467 (71%) · 4 choices (4 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>After Call – next steps</td><td>420</td><td>69%</td></tr>
+<tr><td>After Call – nothing further</td><td>140</td><td>23%</td></tr>
+<tr><td>Call Attempt</td><td>37</td><td>6%</td></tr>
+<tr><td>To Contact</td><td>9</td><td>1%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Next Contact Date <code>date</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,869 (90%) · Range: 2022-12-06 → 2026-08-10</div>
+<div class="flag">90% null — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Promo Campaigns <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 2,072 (100%) · 1 choices (1 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Partner1 221212</td><td>1</td><td>100%</td></tr>
+</tbody></table>
+<div class="flag">Single-value field — only value is &quot;Partner1 221212&quot; (1 records, 100% null). Consider converting to boolean</div>
+</div>
+<div class="field-detail">
+<h4>Shopping List Expiry <code>date</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 842 (41%) · Range: 2022-01-31 → 2026-04-10</div>
+</div>
+<div class="field-detail">
+<h4>Free Shipping Until <code>date</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 858 (41%) · Range: 2021-10-12 → 2026-03-17</div>
+</div>
+<div class="field-detail">
+<h4>Contact History <code>richText</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 986 (48%) · Unique: 1,012 · Length: 1–2,687 (avg 534)</div>
+<div class="flag">Max length 2687 chars — use text() instead of varchar()</div>
+</div>
+<div class="field-detail">
+<h4>Promo Campaign <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 2,024 (98%) · 2 choices (2 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Partner2 04/2023</td><td>30</td><td>61%</td></tr>
+<tr><td>Partner1 04/2024</td><td>20</td><td>41%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Contact Date (auto) <code>lastModifiedTime</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 986 (48%) · Range: 2022-12-12 → 2026-03-16</div>
+</div>
+<div class="field-detail">
+<h4>Contact After Delivery <code>checkbox</code></h4>
+<div class="field-stats">Records: 2,073 · True: 210 (10%) · False: 1,863 (90%)</div>
+<div class="progress-bar"><div class="progress-fill" style="width:10%;background:var(--green)"></div></div>
+</div>
+<div class="field-detail">
+<h4>Free Shipping Notice <code>checkbox</code></h4>
+<div class="field-stats">Records: 2,073 · True: 151 (7%) · False: 1,922 (93%)</div>
+<div class="progress-bar"><div class="progress-fill" style="width:7%;background:var(--green)"></div></div>
+</div>
+<div class="field-detail">
+<h4>Contact re List End <code>checkbox</code></h4>
+<div class="field-stats">Records: 2,073 · True: 35 (2%) · False: 2,038 (98%)</div>
+<div class="progress-bar"><div class="progress-fill" style="width:2%;background:var(--green)"></div></div>
+<div class="flag">Only 2% checked — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Contact Person <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 2,054 (99%) · 1 choices (1 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Designer R</td><td>19</td><td>100%</td></tr>
+</tbody></table>
+<div class="flag">Single-value field — only value is &quot;Designer R&quot; (19 records, 99% null). Consider converting to boolean</div>
+</div>
+<div class="field-detail">
+<h4>Tags <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,946 (94%) · 6 choices (4 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>BF 2023 (to contact)</td><td>57</td><td>45%</td></tr>
+<tr><td>BF 2024</td><td>56</td><td>44%</td></tr>
+<tr><td>BF 2023 (mail)</td><td>35</td><td>28%</td></tr>
+<tr><td>Partner2 03/2024</td><td>14</td><td>11%</td></tr>
+<tr class="unused"><td>BF 2023 (phone)</td><td>0</td><td>0% — never used</td></tr>
+<tr class="unused"><td>BF 2025</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">2 defined choice(s) never used: BF 2023 (phone), BF 2025</div>
+</div>
+<div class="field-detail">
+<h4>Email Sent <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 2,040 (98%) · 2 choices (1 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Sent</td><td>33</td><td>100%</td></tr>
+<tr class="unused"><td>To Send</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: To Send</div>
+<div class="flag">Single-value field — only value is &quot;Sent&quot; (33 records, 98% null). Consider converting to boolean</div>
+</div>
+<div class="field-detail">
+<h4>Automated Emails <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,490 (72%) · 6 choices (6 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>List Expiry – last day</td><td>473</td><td>81%</td></tr>
+<tr><td>List Expiry – 5 days</td><td>458</td><td>79%</td></tr>
+<tr><td>Free Shipping – last day</td><td>413</td><td>71%</td></tr>
+<tr><td>Free Shipping – 2 days</td><td>392</td><td>67%</td></tr>
+<tr><td>DO NOT SEND</td><td>78</td><td>13%</td></tr>
+<tr><td></td><td>19</td><td>3%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Contact Status (new) <code>singleSelect</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,459 (70%) · 7 choices (7 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Project Completed – most ordered with us</td><td>289</td><td>47%</td></tr>
+<tr><td>Won't Order</td><td>119</td><td>19%</td></tr>
+<tr><td>No Contact</td><td>101</td><td>16%</td></tr>
+<tr><td>Order within a month</td><td>50</td><td>8%</td></tr>
+<tr><td>Order later (renovation/build in progress)</td><td>38</td><td>6%</td></tr>
+<tr><td>Order within 2 months</td><td>12</td><td>2%</td></tr>
+<tr><td>Finalizing Details</td><td>5</td><td>1%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Planned Renovation Date <code>date</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,757 (85%) · Range: 2024-09-13 → 2026-11-16</div>
+<div class="flag">85% null — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Notes <code>richText</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 2,031 (98%) · Unique: 20 · Length: 1–71 (avg 16)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>
+</td><td>13</td></tr>
+<tr><td>now what here?
+</td><td>5</td></tr>
+<tr><td>reach out
+</td><td>3</td></tr>
+<tr><td>what status?
+</td><td>3</td></tr>
+<tr><td>what status here? she asked to unlock list and what happened...
+</td><td>2</td></tr>
+<tr><td>reach out - SMS
+</td><td>2</td></tr>
+<tr><td>why won't she order?
+</td><td>1</td></tr>
+<tr><td>does she have everything yet
+</td><td>1</td></tr>
+<tr><td>call
+</td><td>1</td></tr>
+<tr><td>do we have an answer?
+</td><td>1</td></tr>
+</tbody></table>
+<div class="flag">98% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Planned Budget <code>singleLineText</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 1,602 (77%) · Unique: 90 · Length: 4–580 (avg 22)</div>
+<div class="flag">Max length 580 chars — use text() instead of varchar()</div>
+<div class="flag">77% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Modified At (Airtable Export) <code>lastModifiedTime</code></h4>
+<div class="field-stats">Records: 2,073 · Null: 430 (21%) · Range: 2020-09-02 → 2026-03-10</div>
+</div>
+</div></section>
+<section id="table-tbl94C771ANGtmgxz" class="table-section">
+<h2 class="table-header" onclick="toggleSection(this)">
+  <span class="collapse-icon">▸</span>
+  Commissions
+  <span class="table-meta">31,898 records · 19 data fields · 25 computed</span>
+</h2>
+<div class="table-body collapsed">
+<h3>Fields Overview</h3>
+<table class="data-table">
+<thead><tr><th>#</th><th>Field</th><th>Type</th><th>Null%</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Paid</strong></td><td><code>singleSelect</code></td><td class="">0%</td><td>9 choices (6 used)</td></tr>
+<tr><td>2</td><td><strong>Store</strong></td><td><code>linkedRecord → Stores</code></td><td class="">0%</td><td>Up to 2 links → M2M</td></tr>
+<tr><td>3</td><td><strong>Invoice No</strong></td><td><code>singleLineText</code></td><td class="high-null">57%</td><td></td></tr>
+<tr><td>4</td><td><strong>Commission Invoice Date</strong></td><td><code>date</code></td><td class="high-null">57%</td><td>0221-12-31 → 2026-03-06</td></tr>
+<tr><td>5</td><td><strong>Designer Settlement Date</strong></td><td><code>date</code></td><td class="high-null">59%</td><td>2019-07-09 → 2026-02-28</td></tr>
+<tr><td>6</td><td><strong>Designer Settlement Status</strong></td><td><code>singleSelect</code></td><td class="high-null">59%</td><td>3 choices (2 used)</td></tr>
+<tr><td>7</td><td><strong>Order Amount</strong></td><td><code>currency</code></td><td class="">0%</td><td>0–41,056</td></tr>
+<tr><td>8</td><td><strong>SKU</strong></td><td><code>singleLineText</code></td><td class="">19%</td><td>Max 360 chars</td></tr>
+<tr><td>9</td><td><strong>Theoretical Commission (gross)</strong></td><td><code>currency</code></td><td class="">1%</td><td>0–7,250</td></tr>
+<tr><td>10</td><td><strong>Order Status</strong></td><td><code>singleSelect</code></td><td class="high-null">56%</td><td>7 choices (7 used)</td></tr>
+<tr><td>11</td><td><strong>Rooms</strong></td><td><code>linkedRecord → Designed Interiors</code></td><td class="">0%</td><td>100% 0-1 links → M2O</td></tr>
+<tr><td>12</td><td><strong>Proforma</strong></td><td><code>multilineText</code></td><td class="high-null">89%</td><td></td></tr>
+<tr><td>13</td><td><strong>Payment Date</strong></td><td><code>date</code></td><td class="high-null">57%</td><td>0221-12-31 → 2026-03-06</td></tr>
+<tr><td>14</td><td><strong>Modified At</strong></td><td><code>lastModifiedTime</code></td><td class="high-null">—</td><td>2019-12-04 → 2026-03-13</td></tr>
+<tr><td>15</td><td><strong>Issued By</strong></td><td><code>singleSelect</code></td><td class="high-null">57%</td><td>3 choices (3 used)</td></tr>
+<tr><td>16</td><td><strong>Notes</strong></td><td><code>richText</code></td><td class="high-null">100%</td><td>5 unique — dictionary?</td></tr>
+<tr><td>17</td><td><strong>Order Method</strong></td><td><code>singleSelect</code></td><td class="">0%</td><td>4 choices (4 used)</td></tr>
+<tr><td>18</td><td><strong>Promo Email Sent</strong></td><td><code>checkbox</code></td><td class="">0%</td><td>0% checked</td></tr>
+<tr><td>19</td><td><strong>Field 43</strong></td><td><code>singleLineText</code></td><td class="high-null">100%</td><td></td></tr>
+</tbody></table>
+<h3>Computed Fields <span class="badge badge-muted">25 — skip during import</span></h3>
+<table class="data-table">
+<thead><tr><th>Field</th><th>Type</th><th>Result</th><th>Recreate As</th></tr></thead>
+<tbody>
+<tr><td>Name</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Designer</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>Designer Settlement Amount</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Commission Paid</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Designer Settlement Amount (minus Designer N)</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Customer</td><td><code>multipleLookupValues</code></td><td>multipleRecordLinks</td><td>SQL JOIN</td></tr>
+<tr><td>Commission Invoice Month</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Commission Paid/To Pay</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Room Completion Status</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>Project Order Month</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>Commissions Paid to Designer</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Commission Purchases Completion</td><td><code>multipleLookupValues</code></td><td>percent</td><td>SQL JOIN</td></tr>
+<tr><td>City</td><td><code>multipleLookupValues</code></td><td>singleLineText</td><td>SQL JOIN</td></tr>
+<tr><td>Current Month</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Paid Commissions Amount (net)</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Commission Invoice Year</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Order Amount EXP</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Commission Paid EXP</td><td><code>formula</code></td><td>number</td><td>App logic or generated column</td></tr>
+<tr><td>Carpenter</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Shopping List Value</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Email</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Delivery Month</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Package</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Tags</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Project Delivery Date</td><td><code>rollup</code></td><td>date</td><td>SQL aggregate / JOIN</td></tr>
+</tbody></table>
+<h3>Field Details</h3>
+<div class="field-detail">
+<h4>Paid <code>singleSelect</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 30 (0%) · 9 choices (6 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>No</td><td>18,098</td><td>57%</td></tr>
+<tr><td>Yes</td><td>13,656</td><td>43%</td></tr>
+<tr><td>To Settle (order confirmed)</td><td>72</td><td>0%</td></tr>
+<tr><td>Customer Return</td><td>28</td><td>0%</td></tr>
+<tr><td>N/A</td><td>9</td><td>0%</td></tr>
+<tr><td>Invoice Issued</td><td>5</td><td>0%</td></tr>
+<tr class="unused"><td>d</td><td>0</td><td>0% — never used</td></tr>
+<tr class="unused"><td> (s)FS-60/06/2023/SEC</td><td>0</td><td>0% — never used</td></tr>
+<tr class="unused"><td>t</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">3 defined choice(s) never used: d,  (s)FS-60/06/2023/SEC, t</div>
+</div>
+<div class="field-detail">
+<h4>Store <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Stores</strong> · 0 links: 0% · 1 link: 100% · 2+ links: 0% · Max: 2</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 2 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>Invoice No <code>singleLineText</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 18,150 (57%) · Unique: 5,208 · Length: 2–24 (avg 11)</div>
+<div class="flag">57% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Commission Invoice Date <code>date</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 18,288 (57%) · Range: 0221-12-31 → 2026-03-06</div>
+<div class="flag">57% null — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Designer Settlement Date <code>date</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 18,788 (59%) · Range: 2019-07-09 → 2026-02-28</div>
+<div class="flag">59% null — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Designer Settlement Status <code>singleSelect</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 18,758 (59%) · 3 choices (2 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Settled</td><td>13,074</td><td>99%</td></tr>
+<tr><td>To Settle</td><td>66</td><td>1%</td></tr>
+<tr class="unused"><td>N/A</td><td>0</td><td>0% — never used</td></tr>
+</tbody></table>
+<div class="flag">1 defined choice(s) never used: N/A</div>
+</div>
+<div class="field-detail">
+<h4>Order Amount <code>currency</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 36 (0%) · Range: 0–41056 · Avg: 901.68 · Median: 499 · Up to 16 decimals</div>
+</div>
+<div class="field-detail">
+<h4>SKU <code>singleLineText</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 6,157 (19%) · Unique: 25,491 · Length: 14–360 (avg 48)</div>
+<div class="flag">Max length 360 chars — use text() instead of varchar()</div>
+</div>
+<div class="field-detail">
+<h4>Theoretical Commission (gross) <code>currency</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 171 (1%) · Range: 0–7250 · Avg: 197.88 · Median: 108 · Up to 17 decimals</div>
+</div>
+<div class="field-detail">
+<h4>Order Status <code>singleSelect</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 17,784 (56%) · 7 choices (7 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Ordered by Us</td><td>13,618</td><td>96%</td></tr>
+<tr><td>Not Ordered (won't be)</td><td>136</td><td>1%</td></tr>
+<tr><td>Not Ordered (yet)</td><td>131</td><td>1%</td></tr>
+<tr><td>Ordered Directly</td><td>126</td><td>1%</td></tr>
+<tr><td>Ordered Elsewhere</td><td>36</td><td>0%</td></tr>
+<tr><td>Unknown</td><td>35</td><td>0%</td></tr>
+<tr><td>Different Product Ordered</td><td>32</td><td>0%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Rooms <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Designed Interiors</strong> · 0 links: 0% · 1 link: 100% · 2+ links: 0%</div>
+<div class="field-stats"><strong>→ Many-to-One (FK)</strong></div>
+<div class="flag">All records have 0-1 links — Many-to-One relationship (single FK)</div>
+<div class="flag">AT configured as single-record link</div>
+</div>
+<div class="field-detail">
+<h4>Proforma <code>multilineText</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 28,487 (89%) · Unique: 3,093 · Length: 2–64 (avg 14)</div>
+<div class="flag">89% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Payment Date <code>date</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 18,273 (57%) · Range: 0221-12-31 → 2026-03-06</div>
+<div class="flag">57% null — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Modified At <code>lastModifiedTime</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 17,723 (56%) · Range: 2019-12-04 → 2026-03-13</div>
+<div class="flag">56% null — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Issued By <code>singleSelect</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 18,319 (57%) · 3 choices (3 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Designer P</td><td>13,119</td><td>97%</td></tr>
+<tr><td>Designer Q</td><td>436</td><td>3%</td></tr>
+<tr><td>Direct</td><td>24</td><td>0%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Notes <code>richText</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 31,892 (100%) · Unique: 5 · Length: 1–76 (avg 35)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>
+</td><td>2</td></tr>
+<tr><td>This was a top-up order outside our project for 1132 PLN
+</td><td>1</td></tr>
+<tr><td>To be done in early June
+</td><td>1</td></tr>
+<tr><td>Ordered over the weekend during 20% discount - no commission for us
+</td><td>1</td></tr>
+<tr><td>Reduced by customer's partial return of goods
+</td><td>1</td></tr>
+</tbody></table>
+<div class="flag">Only 5 unique values across 31898 records — dictionary candidate</div>
+<div class="flag">100% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Order Method <code>singleSelect</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 52 (0%) · 4 choices (4 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Shopping@Studio</td><td>28,226</td><td>89%</td></tr>
+<tr><td>Proforma</td><td>3,604</td><td>11%</td></tr>
+<tr><td>Studio Store</td><td>11</td><td>0%</td></tr>
+<tr><td>Direct</td><td>5</td><td>0%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Promo Email Sent <code>checkbox</code></h4>
+<div class="field-stats">Records: 31,898 · True: 34 (0%) · False: 31,864 (100%)</div>
+<div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--green)"></div></div>
+<div class="flag">Only 0% checked — rarely used</div>
+</div>
+<div class="field-detail">
+<h4>Field 43 <code>singleLineText</code></h4>
+<div class="field-stats">Records: 31,898 · Null: 31,898 (100%) · Unique: 0</div>
+<div class="flag">All values are empty</div>
+</div>
+</div></section>
+<section id="table-tbll0HM2n4QeRaDjd" class="table-section">
+<h2 class="table-header" onclick="toggleSection(this)">
+  <span class="collapse-icon">▸</span>
+  Stores
+  <span class="table-meta">137 records · 24 data fields · 11 computed</span>
+</h2>
+<div class="table-body collapsed">
+<h3>Fields Overview</h3>
+<table class="data-table">
+<thead><tr><th>#</th><th>Field</th><th>Type</th><th>Null%</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Name</strong> <span class="badge badge-info">PK</span></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>2</td><td><strong>MainCompany</strong></td><td><code>singleLineText</code></td><td class="">6%</td><td></td></tr>
+<tr><td>3</td><td><strong>Commission Rate</strong></td><td><code>multilineText</code></td><td class="">11%</td><td></td></tr>
+<tr><td>4</td><td><strong>Partnership Type</strong></td><td><code>singleSelect</code></td><td class="">2%</td><td>2 choices (2 used)</td></tr>
+<tr><td>5</td><td><strong>Commissions</strong></td><td><code>linkedRecord → Commissions</code></td><td class="">3%</td><td>Up to 4651 links → M2M</td></tr>
+<tr><td>6</td><td><strong>Delivery Cost</strong></td><td><code>richText</code></td><td class="mid-null">37%</td><td></td></tr>
+<tr><td>7</td><td><strong>Delivery Time</strong></td><td><code>richText</code></td><td class="mid-null">41%</td><td></td></tr>
+<tr><td>8</td><td><strong>Partnership Status</strong></td><td><code>singleSelect</code></td><td class="">1%</td><td>3 choices (3 used)</td></tr>
+<tr><td>9</td><td><strong>Billing Method/Invoice</strong></td><td><code>singleSelect</code></td><td class="">18%</td><td>3 choices (3 used)</td></tr>
+<tr><td>10</td><td><strong>Company</strong></td><td><code>singleLineText</code></td><td class="mid-null">23%</td><td></td></tr>
+<tr><td>11</td><td><strong>Internal Notes</strong></td><td><code>richText</code></td><td class="">19%</td><td>Max 918 chars</td></tr>
+<tr><td>12</td><td><strong>Bank Account</strong></td><td><code>singleLineText</code></td><td class="mid-null">32%</td><td></td></tr>
+<tr><td>13</td><td><strong>Contract Sending Status</strong></td><td><code>singleSelect</code></td><td class="high-null">51%</td><td>2 choices (2 used)</td></tr>
+<tr><td>14</td><td><strong>Address</strong></td><td><code>multilineText</code></td><td class="mid-null">29%</td><td></td></tr>
+<tr><td>15</td><td><strong>Order Method S@S</strong></td><td><code>singleSelect</code></td><td class="mid-null">34%</td><td>7 choices (7 used)</td></tr>
+<tr><td>16</td><td><strong>NIP</strong></td><td><code>singleLineText</code></td><td class="mid-null">31%</td><td></td></tr>
+<tr><td>17</td><td><strong>Offer Details</strong></td><td><code>richText</code></td><td class="mid-null">48%</td><td></td></tr>
+<tr><td>18</td><td><strong>Offered Product Categories</strong></td><td><code>multipleSelects</code></td><td class="mid-null">37%</td><td>36 choices (36 used)</td></tr>
+<tr><td>19</td><td><strong>Address on studio.com</strong></td><td><code>url</code></td><td class="high-null">75%</td><td></td></tr>
+<tr><td>20</td><td><strong>Manufacturer/Store URL</strong></td><td><code>url</code></td><td class="mid-null">38%</td><td></td></tr>
+<tr><td>21</td><td><strong>Visible to External Designers</strong></td><td><code>checkbox</code></td><td class="">0%</td><td>47% checked</td></tr>
+<tr><td>22</td><td><strong>Orders – Website</strong></td><td><code>url</code></td><td class="high-null">85%</td><td></td></tr>
+<tr><td>23</td><td><strong>Orders – Login Credentials</strong></td><td><code>multilineText</code></td><td class="high-null">77%</td><td>Max 294 chars</td></tr>
+<tr><td>24</td><td><strong>Store Products – Data</strong></td><td><code>multilineText</code></td><td class="high-null">99%</td><td>Max 264 chars · 1 unique — dictionary?</td></tr>
+</tbody></table>
+<h3>Computed Fields <span class="badge badge-muted">11 — skip during import</span></h3>
+<table class="data-table">
+<thead><tr><th>Field</th><th>Type</th><th>Result</th><th>Recreate As</th></tr></thead>
+<tbody>
+<tr><td>Theoretical Commissions</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Paid/To-Pay Commissions</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Orders Value</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Paid Orders</td><td><code>rollup</code></td><td>currency</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Paid Commissions %</td><td><code>formula</code></td><td>percent</td><td>App logic or generated column</td></tr>
+<tr><td>Completed Orders % (by value)</td><td><code>formula</code></td><td>percent</td><td>App logic or generated column</td></tr>
+<tr><td>Projects</td><td><code>rollup</code></td><td>number</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Average Order Value</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Completed Orders</td><td><code>count</code></td><td>—</td><td>SQL COUNT or app logic</td></tr>
+<tr><td>Avg Order Value for Completed</td><td><code>formula</code></td><td>currency</td><td>App logic or generated column</td></tr>
+<tr><td>Website URL</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+</tbody></table>
+<h3>Field Details</h3>
+<div class="field-detail">
+<h4>Name <code>singleLineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 0 (0%) · Unique: 137 · Length: 3–32 (avg 9)</div>
+</div>
+<div class="field-detail">
+<h4>MainCompany <code>singleLineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 8 (6%) · Unique: 128 · Length: 3–32 (avg 9)</div>
+</div>
+<div class="field-detail">
+<h4>Commission Rate <code>multilineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 15 (11%) · Unique: 26 · Length: 2–55 (avg 4)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>20%</td><td>40</td></tr>
+<tr><td>10%</td><td>17</td></tr>
+<tr><td>15%</td><td>13</td></tr>
+<tr><td>30%</td><td>10</td></tr>
+<tr><td>25%</td><td>9</td></tr>
+<tr><td>5%</td><td>3</td></tr>
+<tr><td>25%
+</td><td>3</td></tr>
+<tr><td>30%
+</td><td>3</td></tr>
+<tr><td>35%</td><td>3</td></tr>
+<tr><td>20% </td><td>2</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Partnership Type <code>singleSelect</code></h4>
+<div class="field-stats">Records: 137 · Null: 3 (2%) · 2 choices (2 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Dropshipping</td><td>76</td><td>57%</td></tr>
+<tr><td>Reseller</td><td>58</td><td>43%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Commissions <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Commissions</strong> · 0 links: 3% · 1 link: 10% · 2+ links: 87% · Max: 4651</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 4651 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>Delivery Cost <code>richText</code></h4>
+<div class="field-stats">Records: 137 · Null: 51 (37%) · Unique: 76 · Length: 1–184 (avg 43)</div>
+</div>
+<div class="field-detail">
+<h4>Delivery Time <code>richText</code></h4>
+<div class="field-stats">Records: 137 · Null: 56 (41%) · Unique: 75 · Length: 1–232 (avg 43)</div>
+</div>
+<div class="field-detail">
+<h4>Partnership Status <code>singleSelect</code></h4>
+<div class="field-stats">Records: 137 · Null: 2 (1%) · 3 choices (3 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Active</td><td>85</td><td>63%</td></tr>
+<tr><td>Suspended</td><td>25</td><td>19%</td></tr>
+<tr><td>Occasional</td><td>25</td><td>19%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Billing Method/Invoice <code>singleSelect</code></h4>
+<div class="field-stats">Records: 137 · Null: 25 (18%) · 3 choices (3 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Monthly</td><td>72</td><td>64%</td></tr>
+<tr><td>Per Order</td><td>38</td><td>34%</td></tr>
+<tr><td>Commission-based</td><td>2</td><td>2%</td></tr>
+</tbody></table>
+<div class="flag">Choice &quot;Commission-based&quot; used by only 2 record(s)</div>
+</div>
+<div class="field-detail">
+<h4>Company <code>singleLineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 32 (23%) · Unique: 103 · Length: 5–63 (avg 24)</div>
+</div>
+<div class="field-detail">
+<h4>Internal Notes <code>richText</code></h4>
+<div class="field-stats">Records: 137 · Null: 26 (19%) · Unique: 89 · Length: 8–918 (avg 198)</div>
+<div class="flag">Max length 918 chars — use text() instead of varchar()</div>
+</div>
+<div class="field-detail">
+<h4>Bank Account <code>singleLineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 44 (32%) · Unique: 93 · Length: 26–33 (avg 32)</div>
+</div>
+<div class="field-detail">
+<h4>Contract Sending Status <code>singleSelect</code></h4>
+<div class="field-stats">Records: 137 · Null: 70 (51%) · 2 choices (2 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Signed</td><td>59</td><td>88%</td></tr>
+<tr><td>Sent</td><td>8</td><td>12%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Address <code>multilineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 40 (29%) · Unique: 97 · Length: 22–134 (avg 41)</div>
+</div>
+<div class="field-detail">
+<h4>Order Method S@S <code>singleSelect</code></h4>
+<div class="field-stats">Records: 137 · Null: 46 (34%) · 7 choices (7 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Email</td><td>43</td><td>47%</td></tr>
+<tr><td>Via Store</td><td>20</td><td>22%</td></tr>
+<tr><td>Email after quote</td><td>12</td><td>13%</td></tr>
+<tr><td>Via B2B Platform</td><td>11</td><td>12%</td></tr>
+<tr><td>customer discount code</td><td>2</td><td>2%</td></tr>
+<tr><td>order form</td><td>2</td><td>2%</td></tr>
+<tr><td>proforma</td><td>1</td><td>1%</td></tr>
+</tbody></table>
+<div class="flag">Choice &quot;customer discount code&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;order form&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;proforma&quot; used by only 1 record(s)</div>
+</div>
+<div class="field-detail">
+<h4>NIP <code>singleLineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 43 (31%) · Unique: 93 · Length: 10–13 (avg 10)</div>
+</div>
+<div class="field-detail">
+<h4>Offer Details <code>richText</code></h4>
+<div class="field-stats">Records: 137 · Null: 66 (48%) · Unique: 47 · Length: 5–142 (avg 23)</div>
+</div>
+<div class="field-detail">
+<h4>Offered Product Categories <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 137 · Null: 51 (37%) · 36 choices (36 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Beds</td><td>23</td><td>27%</td></tr>
+<tr><td>Desks</td><td>20</td><td>23%</td></tr>
+<tr><td>Shelving Units</td><td>19</td><td>22%</td></tr>
+<tr><td>Shelves</td><td>19</td><td>22%</td></tr>
+<tr><td>Dressers</td><td>17</td><td>20%</td></tr>
+<tr><td>Wardrobes</td><td>17</td><td>20%</td></tr>
+<tr><td>Decorations</td><td>14</td><td>16%</td></tr>
+<tr><td>Accessories</td><td>13</td><td>15%</td></tr>
+<tr><td>Poufs and Seating</td><td>11</td><td>13%</td></tr>
+<tr><td>Side Tables</td><td>11</td><td>13%</td></tr>
+<tr><td>Wallpapers</td><td>11</td><td>13%</td></tr>
+<tr><td>Lighting</td><td>10</td><td>12%</td></tr>
+<tr><td>Bunk Beds</td><td>10</td><td>12%</td></tr>
+<tr><td>Nightstands</td><td>10</td><td>12%</td></tr>
+<tr><td>Chairs Highchairs and Tables</td><td>10</td><td>12%</td></tr>
+<tr><td>Stickers</td><td>9</td><td>10%</td></tr>
+<tr><td>Lamps - Ceiling</td><td>8</td><td>9%</td></tr>
+<tr><td>Loft Beds</td><td>8</td><td>9%</td></tr>
+<tr><td>Storage Bins</td><td>7</td><td>8%</td></tr>
+<tr><td>Wall Panels</td><td>7</td><td>8%</td></tr>
+<tr><td>Lamps - Wall Sconces</td><td>6</td><td>7%</td></tr>
+<tr><td>Other</td><td>6</td><td>7%</td></tr>
+<tr><td>Extendable Beds</td><td>6</td><td>7%</td></tr>
+<tr><td>Trunks</td><td>6</td><td>7%</td></tr>
+<tr><td>Rugs</td><td>5</td><td>6%</td></tr>
+<tr><td>Upholstered Beds</td><td>4</td><td>5%</td></tr>
+<tr><td>Handles</td><td>4</td><td>5%</td></tr>
+<tr><td>Climbing Walls</td><td>4</td><td>5%</td></tr>
+<tr><td>Ladders and Accessories</td><td>3</td><td>3%</td></tr>
+<tr><td>Boards</td><td>3</td><td>3%</td></tr>
+<tr><td>Desk Chairs</td><td>3</td><td>3%</td></tr>
+<tr><td>Decorative Lights</td><td>3</td><td>3%</td></tr>
+<tr><td>Mattresses</td><td>2</td><td>2%</td></tr>
+<tr><td>Neon Signs</td><td>1</td><td>1%</td></tr>
+<tr><td>Custom Blinds</td><td>1</td><td>1%</td></tr>
+<tr><td>Flower Stands</td><td>1</td><td>1%</td></tr>
+</tbody></table>
+<div class="flag">Choice &quot;Mattresses&quot; used by only 2 record(s)</div>
+<div class="flag">Choice &quot;Neon Signs&quot; used by only 1 record(s)</div>
+<div class="flag">Choice &quot;Custom Blinds&quot; used by only 1 record(s)</div>
+<div class="flag">Choice &quot;Flower Stands&quot; used by only 1 record(s)</div>
+</div>
+<div class="field-detail">
+<h4>Address on studio.com <code>url</code></h4>
+<div class="field-stats">Records: 137 · Null: 103 (75%) · Unique: 33 · Length: 30–44 (avg 34)</div>
+<div class="flag">75% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Manufacturer/Store URL <code>url</code></h4>
+<div class="field-stats">Records: 137 · Null: 52 (38%) · Unique: 84 · Length: 16–192 (avg 26)</div>
+</div>
+<div class="field-detail">
+<h4>Visible to External Designers <code>checkbox</code></h4>
+<div class="field-stats">Records: 137 · True: 65 (47%) · False: 72 (53%)</div>
+<div class="progress-bar"><div class="progress-fill" style="width:47%;background:var(--green)"></div></div>
+</div>
+<div class="field-detail">
+<h4>Orders – Website <code>url</code></h4>
+<div class="field-stats">Records: 137 · Null: 116 (85%) · Unique: 21 · Length: 8–100 (avg 32)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>https://vendor-1.example.com/</td><td>1</td></tr>
+<tr><td>https://b2b.vendor-2.example.com/login</td><td>1</td></tr>
+<tr><td>https://vendor-3.example.com/my-account/</td><td>1</td></tr>
+<tr><td>https://vendor-4.example.com/</td><td>1</td></tr>
+<tr><td>https://b2b.vendor-5.example.com/shop/</td><td>1</td></tr>
+<tr><td>vendor-2.example.com</td><td>1</td></tr>
+<tr><td>https://shop.vendor-6.example.com/</td><td>1</td></tr>
+<tr><td>https://www.vendor-7.example.com/</td><td>1</td></tr>
+<tr><td>https://mos.vendor-8.example.com/prod/</td><td>1</td></tr>
+<tr><td>www.vendor-9.example.com/b2b_system</td><td>1</td></tr>
+</tbody></table>
+<div class="flag">85% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Orders – Login Credentials <code>multilineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 106 (77%) · Unique: 30 · Length: 26–294 (avg 50)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>shopping@studio.com
+[password removed]</td><td>2</td></tr>
+<tr><td>shopping@studio.com
+password: [removed]</td><td>1</td></tr>
+<tr><td>https://vendor-portal.example.com/enterprise/XXXXXXX/b2b/index.php?client=[REDACTED]...</td><td>1</td></tr>
+<tr><td>shopping@studio.com
+password: [removed]</td><td>1</td></tr>
+<tr><td>Company: XXXXXXXXXX
+Employee: Partner Employee 1
+Password: [removed]</td><td>1</td></tr>
+<tr><td>shopping@studio.com
+[password removed]</td><td>1</td></tr>
+<tr><td>shopping@studio.com
+password: [removed]</td><td>1</td></tr>
+<tr><td>shopping@studio.com
+[password removed]</td><td>1</td></tr>
+<tr><td>shopping@studio.com
+[password removed]</td><td>1</td></tr>
+<tr><td>shopping@studio.com
+password: [removed]</td><td>1</td></tr>
+</tbody></table>
+<div class="flag">Max length 294 chars — use text() instead of varchar()</div>
+<div class="flag">77% empty — rarely used field</div>
+</div>
+<div class="field-detail">
+<h4>Store Products – Data <code>multilineText</code></h4>
+<div class="field-stats">Records: 137 · Null: 136 (99%) · Unique: 1 · Length: 264–264 (avg 264)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>XML file: https://www.vendor-sk.example.com/wp-content/uploads/woo-feed/google/xml/b2b-par...</td><td>1</td></tr>
+</tbody></table>
+<div class="flag">Only 1 unique values across 137 records — dictionary candidate</div>
+<div class="flag">Max length 264 chars — use text() instead of varchar()</div>
+<div class="flag">99% empty — rarely used field</div>
+</div>
+</div></section>
+<section id="table-tbl4oUbOaDN7sbizJ" class="table-section">
+<h2 class="table-header" onclick="toggleSection(this)">
+  <span class="collapse-icon">▸</span>
+  Service Packages
+  <span class="table-meta">14 records · 3 data fields · 1 computed</span>
+</h2>
+<div class="table-body collapsed">
+<h3>Fields Overview</h3>
+<table class="data-table">
+<thead><tr><th>#</th><th>Field</th><th>Type</th><th>Null%</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Name</strong> <span class="badge badge-info">PK</span></td><td><code>singleLineText</code></td><td class="">0%</td><td></td></tr>
+<tr><td>2</td><td><strong>Price</strong></td><td><code>currency</code></td><td class="mid-null">50%</td><td>All integers · 199–2,949</td></tr>
+<tr><td>3</td><td><strong>Customer Orders</strong></td><td><code>linkedRecord → Customer Orders</code></td><td class="">7%</td><td>Up to 775 links → M2M</td></tr>
+</tbody></table>
+<h3>Computed Fields <span class="badge badge-muted">1 — skip during import</span></h3>
+<table class="data-table">
+<thead><tr><th>Field</th><th>Type</th><th>Result</th><th>Recreate As</th></tr></thead>
+<tbody>
+<tr><td>Sold Packages Value</td><td><code>rollup</code></td><td>—</td><td>SQL aggregate / JOIN</td></tr>
+</tbody></table>
+<h3>Field Details</h3>
+<div class="field-detail">
+<h4>Name <code>singleLineText</code></h4>
+<div class="field-stats">Records: 14 · Null: 0 (0%) · Unique: 14 · Length: 3–19 (avg 9)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>
+<tr><td>VIP</td><td>1</td></tr>
+<tr><td>VIP_2019_09</td><td>1</td></tr>
+<tr><td>ONE</td><td>1</td></tr>
+<tr><td>PREMIUM_OTHER_ROOMS</td><td>1</td></tr>
+<tr><td>PREMIUM</td><td>1</td></tr>
+<tr><td>PREMIUM_2018</td><td>1</td></tr>
+<tr><td>MINI</td><td>1</td></tr>
+<tr><td>FIRST</td><td>1</td></tr>
+<tr><td>other</td><td>1</td></tr>
+<tr><td>EXPRESS_SURCHARGE</td><td>1</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Price <code>currency</code></h4>
+<div class="field-stats">Records: 14 · Null: 7 (50%) · Range: 199–2949 · Avg: 1720.57 · Median: 1599 · All integers</div>
+<div class="flag">All values are integers</div>
+</div>
+<div class="field-detail">
+<h4>Customer Orders <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Customer Orders</strong> · 0 links: 7% · 1 link: 14% · 2+ links: 79% · Max: 775</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 775 links — Many-to-Many relationship</div>
+</div>
+</div></section>
+<section id="table-tblG15dxwxRdXaXH9" class="table-section">
+<h2 class="table-header" onclick="toggleSection(this)">
+  <span class="collapse-icon">▸</span>
+  Contacts
+  <span class="table-meta">276 records · 8 data fields · 4 computed</span>
+</h2>
+<div class="table-body collapsed">
+<h3>Fields Overview</h3>
+<table class="data-table">
+<thead><tr><th>#</th><th>Field</th><th>Type</th><th>Null%</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Status</strong></td><td><code>singleSelect</code></td><td class="">0%</td><td>3 choices (3 used)</td></tr>
+<tr><td>2</td><td><strong>Notes</strong></td><td><code>richText</code></td><td class="">0%</td><td>Max 970 chars</td></tr>
+<tr><td>3</td><td><strong>Contact Type</strong></td><td><code>singleSelect</code></td><td class="">7%</td><td>3 choices (3 used)</td></tr>
+<tr><td>4</td><td><strong>Contact Date</strong></td><td><code>date</code></td><td class="">0%</td><td>2020-09-01 → 2021-11-01</td></tr>
+<tr><td>5</td><td><strong>Interiors</strong></td><td><code>linkedRecord → Designed Interiors</code></td><td class="">0%</td><td>Up to 4 links → M2M</td></tr>
+<tr><td>6</td><td><strong>Assigned To</strong></td><td><code>multipleSelects</code></td><td class="">0%</td><td>2 choices (2 used)</td></tr>
+<tr><td>7</td><td><strong>Topics</strong></td><td><code>multipleSelects</code></td><td class="mid-null">38%</td><td>6 choices (6 used)</td></tr>
+<tr><td>8</td><td><strong>Last Modified</strong></td><td><code>lastModifiedTime</code></td><td class="">—</td><td>2020-10-26 → 2021-09-23</td></tr>
+</tbody></table>
+<h3>Computed Fields <span class="badge badge-muted">4 — skip during import</span></h3>
+<table class="data-table">
+<thead><tr><th>Field</th><th>Type</th><th>Result</th><th>Recreate As</th></tr></thead>
+<tbody>
+<tr><td>Contact</td><td><code>formula</code></td><td>singleLineText</td><td>App logic or generated column</td></tr>
+<tr><td>Customer</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Phone</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+<tr><td>Email</td><td><code>rollup</code></td><td>singleLineText</td><td>SQL aggregate / JOIN</td></tr>
+</tbody></table>
+<h3>Field Details</h3>
+<div class="field-detail">
+<h4>Status <code>singleSelect</code></h4>
+<div class="field-stats">Records: 276 · Null: 0 (0%) · 3 choices (3 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Done</td><td>218</td><td>79%</td></tr>
+<tr><td>In Progress (waiting)</td><td>33</td><td>12%</td></tr>
+<tr><td>To Do</td><td>25</td><td>9%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Notes <code>richText</code></h4>
+<div class="field-stats">Records: 276 · Null: 0 (0%) · Unique: 263 · Length: 19–970 (avg 196)</div>
+<div class="flag">Max length 970 chars — use text() instead of varchar()</div>
+</div>
+<div class="field-detail">
+<h4>Contact Type <code>singleSelect</code></h4>
+<div class="field-stats">Records: 276 · Null: 19 (7%) · 3 choices (3 used)</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Phone ☎️</td><td>168</td><td>65%</td></tr>
+<tr><td>Task ✅</td><td>67</td><td>26%</td></tr>
+<tr><td>Email ✉️</td><td>22</td><td>9%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Contact Date <code>date</code></h4>
+<div class="field-stats">Records: 276 · Null: 1 (0%) · Range: 2020-09-01 → 2021-11-01</div>
+</div>
+<div class="field-detail">
+<h4>Interiors <code>multipleRecordLinks</code></h4>
+<div class="field-stats">Links to: <strong>Designed Interiors</strong> · 0 links: 0% · 1 link: 81% · 2+ links: 19% · Max: 4</div>
+<div class="field-stats"><strong>→ Many-to-Many (junction table)</strong></div>
+<div class="flag">Records have up to 4 links — Many-to-Many relationship</div>
+</div>
+<div class="field-detail">
+<h4>Assigned To <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 276 · Null: 1 (0%) · 2 choices (2 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Designer N</td><td>205</td><td>75%</td></tr>
+<tr><td>Designer P</td><td>70</td><td>25%</td></tr>
+</tbody></table>
+</div>
+<div class="field-detail">
+<h4>Topics <code>multipleSelects</code></h4>
+<div class="field-stats">Records: 276 · Null: 105 (38%) · 6 choices (6 used) · multipleSelects</div>
+<table class="data-table data-table-compact"><thead><tr><th>Choice</th><th>Count</th><th>%</th></tr></thead><tbody>
+<tr><td>Partnership Review</td><td>80</td><td>47%</td></tr>
+<tr><td>FB Review</td><td>40</td><td>23%</td></tr>
+<tr><td>Post-delivery – orders</td><td>31</td><td>18%</td></tr>
+<tr><td>Proforma Updates</td><td>25</td><td>15%</td></tr>
+<tr><td>Order Verification</td><td>21</td><td>12%</td></tr>
+<tr><td>Photo Request</td><td>2</td><td>1%</td></tr>
+</tbody></table>
+<div class="flag">Choice &quot;Photo Request&quot; used by only 2 record(s)</div>
+</div>
+<div class="field-detail">
+<h4>Last Modified <code>lastModifiedTime</code></h4>
+<div class="field-stats">Records: 276 · Null: 0 (0%) · Range: 2020-10-26 → 2021-09-23</div>
+</div>
+</div></section>
+
+<footer class="footer">
+  <p>Generated by <a href="https://github.com/mperlak/airtable-migration-audit" target="_blank">airtable-migration-audit</a> — free, open-source Airtable migration analysis.</p>
+  <p>Ready to build what comes next? <a href="https://straktur.com?utm_source=airtable-migration-audit&amp;utm_medium=report&amp;utm_content=footer-cta" target="_blank">Straktur</a> is a production-ready Next.js starter for internal tools.</p>
+</footer>
+
+</main>
+
+<script>
+
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('open');
+  body.classList.toggle('collapsed');
+}
+
+const links = document.querySelectorAll('.sidebar-link');
+const observer = new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    if (entry.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector('.sidebar-link[href="#' + entry.target.id + '"]');
+      if (link) link.classList.add('active');
+    }
+  }
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
+
+function toggleTheme() {
+  const html = document.documentElement;
+  if (html.classList.contains('dark')) {
+    html.classList.remove('dark');
+    html.classList.add('light');
+  } else if (html.classList.contains('light')) {
+    html.classList.remove('light');
+    html.classList.add('dark');
+  } else {
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    html.classList.add(isDark ? 'light' : 'dark');
+  }
+}
+
+document.querySelectorAll('.sidebar-link').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const header = target.querySelector('.table-header');
+      if (header && !header.classList.contains('open')) {
+        toggleSection(header);
+      }
+    }
+  });
+});
+
+</script>
+</body>
+</html>

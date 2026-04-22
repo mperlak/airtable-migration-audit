@@ -1,0 +1,2877 @@
+{
+  "generatedAt": "2026-03-16T11:21:57.572Z",
+  "schemaVersion": 1,
+  "tables": [
+    {
+      "airtableId": "tblH7KEpEcobTs49S",
+      "airtableName": "Customers",
+      "dbTableName": "customers",
+      "recordCount": 1531,
+      "importOrder": 0,
+      "columns": [
+        {
+          "airtableName": "Name",
+          "dbColumnName": "name",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": true,
+          "validation": {
+            "type": "string",
+            "maxLength": 34
+          }
+        },
+        {
+          "airtableName": "First Name",
+          "dbColumnName": "first_name",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 12
+          }
+        },
+        {
+          "airtableName": "Last Name",
+          "dbColumnName": "last_name",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 24
+          }
+        },
+        {
+          "airtableName": "Email",
+          "dbColumnName": "email",
+          "airtableType": "email",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 39
+          }
+        },
+        {
+          "airtableName": "Phone",
+          "dbColumnName": "phone",
+          "airtableType": "phoneNumber",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 19
+          }
+        },
+        {
+          "airtableName": "Address",
+          "dbColumnName": "address",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(100)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 62
+          }
+        },
+        {
+          "airtableName": "City",
+          "dbColumnName": "city",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 44
+          }
+        },
+        {
+          "airtableName": "Postal Code",
+          "dbColumnName": "postal_code",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 8
+          }
+        },
+        {
+          "airtableName": "Region",
+          "dbColumnName": "region",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 19
+          }
+        },
+        {
+          "airtableName": "Country",
+          "dbColumnName": "country",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 6
+          }
+        }
+      ],
+      "relations": [],
+      "lookupTables": [],
+      "skip": [],
+      "computedFields": []
+    },
+    {
+      "airtableId": "tblSdYmRLaON1TzPB",
+      "airtableName": "Customer Orders",
+      "dbTableName": "customer_orders",
+      "recordCount": 1759,
+      "importOrder": 1,
+      "columns": [
+        {
+          "airtableName": "Order Number",
+          "dbColumnName": "order_number",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": true,
+          "validation": {
+            "type": "string",
+            "maxLength": 10
+          }
+        },
+        {
+          "airtableName": "Quantity",
+          "dbColumnName": "quantity",
+          "airtableType": "number",
+          "pgType": "integer",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 0,
+            "max": 12
+          }
+        },
+        {
+          "airtableName": "Purchase Date",
+          "dbColumnName": "purchase_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Discount",
+          "dbColumnName": "discount",
+          "airtableType": "number",
+          "pgType": "numeric(5,2)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "precision": 5,
+            "scale": 2
+          }
+        },
+        {
+          "airtableName": "Notes",
+          "dbColumnName": "notes",
+          "airtableType": "multilineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 53
+          }
+        },
+        {
+          "airtableName": "Order Total",
+          "dbColumnName": "order_total",
+          "airtableType": "number",
+          "pgType": "numeric(7,2)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 0,
+            "max": 26000,
+            "precision": 7,
+            "scale": 2
+          }
+        },
+        {
+          "airtableName": "Invoice Number",
+          "dbColumnName": "invoice_number",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 10
+          }
+        }
+      ],
+      "relations": [
+        {
+          "airtableFieldName": "Customer",
+          "dbColumnName": "customer_id",
+          "type": "manyToOne",
+          "targetTable": "customers",
+          "targetAirtableName": "Customers"
+        }
+      ],
+      "lookupTables": [
+        {
+          "airtableFieldName": "Purchase Channel",
+          "dbColumnName": "purchase_channel_id",
+          "lookupTableName": "customer_orders_purchase_channel",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "WooCommerce",
+              "usageCount": 1038
+            },
+            {
+              "name": "Shoplo",
+              "usageCount": 161
+            },
+            {
+              "name": "Direct",
+              "usageCount": 33
+            },
+            {
+              "name": "Promo",
+              "usageCount": 2
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "FB Review",
+          "dbColumnName": "fb_review_id",
+          "lookupTableName": "customer_orders_fb_review",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Request Sent",
+              "usageCount": 380
+            },
+            {
+              "name": "Received",
+              "usageCount": 149
+            },
+            {
+              "name": "DO NOT SEND",
+              "usageCount": 30
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Return Status",
+          "dbColumnName": "return_status_id",
+          "lookupTableName": "customer_orders_return_status",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Return",
+              "usageCount": 4
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Promotion",
+          "dbColumnName": "promotion_id",
+          "lookupTableName": "customer_orders_promotion",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Project Sale 2025",
+              "usageCount": 31
+            },
+            {
+              "name": "Project Sale 202312",
+              "usageCount": 30
+            },
+            {
+              "name": "FinalSale24",
+              "usageCount": 25
+            },
+            {
+              "name": "1,500 Projects Campaign",
+              "usageCount": 25
+            },
+            {
+              "name": "5-Year Anniversary",
+              "usageCount": 19
+            },
+            {
+              "name": "BlackWeek2024",
+              "usageCount": 15
+            },
+            {
+              "name": "Spring Promo 2024",
+              "usageCount": 14
+            },
+            {
+              "name": "Winter Sale Finale 2024",
+              "usageCount": 13
+            },
+            {
+              "name": "FALL20",
+              "usageCount": 13
+            },
+            {
+              "name": "SPRING25",
+              "usageCount": 12
+            },
+            {
+              "name": "Autumn Design 2024",
+              "usageCount": 12
+            },
+            {
+              "name": "Spring Discounts 2024",
+              "usageCount": 12
+            },
+            {
+              "name": "Winter Break Discount 2024",
+              "usageCount": 11
+            },
+            {
+              "name": "BF 2023",
+              "usageCount": 9
+            },
+            {
+              "name": "June Promo 2024",
+              "usageCount": 8
+            },
+            {
+              "name": "Winter Break Discount 2025",
+              "usageCount": 7
+            },
+            {
+              "name": "NOW20",
+              "usageCount": 7
+            },
+            {
+              "name": "DREAMS20",
+              "usageCount": 6
+            },
+            {
+              "name": "OCT17",
+              "usageCount": 5
+            },
+            {
+              "name": "For Her For Him 2024",
+              "usageCount": 3
+            },
+            {
+              "name": "1,300 Rooms Campaign",
+              "usageCount": 2
+            },
+            {
+              "name": "Flash Sale 20231203",
+              "usageCount": 1
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Mailing",
+          "dbColumnName": "mailing",
+          "lookupTableName": "customer_orders_mailing",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "Post-order Survey",
+              "usageCount": 123
+            }
+          ]
+        }
+      ],
+      "skip": [],
+      "computedFields": [
+        {
+          "airtableName": "Purchase Month",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Order Value (net)",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Packages (products)",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Shopping List Value",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid Commissions",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Unpaid Commissions",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "All Commissions Value",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Year",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Region",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "City",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Country",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Phone",
+          "airtableType": "multipleLookupValues",
+          "resultType": "phoneNumber",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Email",
+          "airtableType": "multipleLookupValues",
+          "resultType": "email",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Current Month",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Current Month v2",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Average Price per Project",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "First Name",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Last Name",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Completed Orders",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        }
+      ]
+    },
+    {
+      "airtableId": "tblSg3BjL0zjpw9jK",
+      "airtableName": "Designed Interiors",
+      "dbTableName": "designed_interiors",
+      "recordCount": 2073,
+      "importOrder": 2,
+      "columns": [
+        {
+          "airtableName": "Children Names",
+          "dbColumnName": "children_names",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(100)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 66
+          }
+        },
+        {
+          "airtableName": "Children Ages",
+          "dbColumnName": "children_ages",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 9
+          }
+        },
+        {
+          "airtableName": "Shopping List Value",
+          "dbColumnName": "shopping_list_value",
+          "airtableType": "currency",
+          "pgType": "numeric(12,2)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 419,
+            "max": 73010.9,
+            "precision": 7,
+            "scale": 2
+          }
+        },
+        {
+          "airtableName": "Delivery Date",
+          "dbColumnName": "delivery_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "WordPress Project No. (old)",
+          "dbColumnName": "wordpress_project_no_old",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 3
+          }
+        },
+        {
+          "airtableName": "Rooms Count",
+          "dbColumnName": "rooms_count",
+          "airtableType": "number",
+          "pgType": "integer",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "airtableName": "Shopping List",
+          "dbColumnName": "shopping_list",
+          "airtableType": "url",
+          "pgType": "varchar(150)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 146
+          }
+        },
+        {
+          "airtableName": "Survey Link",
+          "dbColumnName": "survey_link",
+          "airtableType": "url",
+          "pgType": "varchar(150)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 146
+          }
+        },
+        {
+          "airtableName": "Area (m\u00b2)",
+          "dbColumnName": "area_m2",
+          "airtableType": "number",
+          "pgType": "numeric(4,2)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 0,
+            "max": 54,
+            "precision": 4,
+            "scale": 2
+          }
+        },
+        {
+          "airtableName": "Next Contact Date",
+          "dbColumnName": "next_contact_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Shopping List Expiry",
+          "dbColumnName": "shopping_list_expiry",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Free Shipping Until",
+          "dbColumnName": "free_shipping_until",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Contact History",
+          "dbColumnName": "contact_history",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 2687
+          }
+        },
+        {
+          "airtableName": "Contact After Delivery",
+          "dbColumnName": "contact_after_delivery",
+          "airtableType": "checkbox",
+          "pgType": "boolean",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "boolean"
+          },
+          "default": "false"
+        },
+        {
+          "airtableName": "Free Shipping Notice",
+          "dbColumnName": "free_shipping_notice",
+          "airtableType": "checkbox",
+          "pgType": "boolean",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "boolean"
+          },
+          "default": "false"
+        },
+        {
+          "airtableName": "Contact re List End",
+          "dbColumnName": "contact_re_list_end",
+          "airtableType": "checkbox",
+          "pgType": "boolean",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "boolean"
+          },
+          "default": "false"
+        },
+        {
+          "airtableName": "Planned Renovation Date",
+          "dbColumnName": "planned_renovation_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Notes",
+          "dbColumnName": "notes",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 71
+          }
+        },
+        {
+          "airtableName": "Planned Budget",
+          "dbColumnName": "planned_budget",
+          "airtableType": "singleLineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 580
+          }
+        }
+      ],
+      "relations": [
+        {
+          "airtableFieldName": "Order",
+          "dbColumnName": "order_id",
+          "type": "manyToOne",
+          "targetTable": "customer_orders",
+          "targetAirtableName": "Customer Orders"
+        }
+      ],
+      "lookupTables": [
+        {
+          "airtableFieldName": "Lead Designer",
+          "dbColumnName": "lead_designer_id",
+          "lookupTableName": "designed_interiors_lead_designer",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Designer A",
+              "usageCount": 611
+            },
+            {
+              "name": "Designer B",
+              "usageCount": 363
+            },
+            {
+              "name": "Designer C",
+              "usageCount": 264
+            },
+            {
+              "name": "Designer D",
+              "usageCount": 229
+            },
+            {
+              "name": "Designer E",
+              "usageCount": 213
+            },
+            {
+              "name": "Designer F",
+              "usageCount": 123
+            },
+            {
+              "name": "Designer G",
+              "usageCount": 62
+            },
+            {
+              "name": "Designer H",
+              "usageCount": 29
+            },
+            {
+              "name": "Designer I",
+              "usageCount": 16
+            },
+            {
+              "name": "Designer J",
+              "usageCount": 15
+            },
+            {
+              "name": "Designer K",
+              "usageCount": 15
+            },
+            {
+              "name": "Designer L",
+              "usageCount": 3
+            },
+            {
+              "name": "Designer M",
+              "usageCount": 2
+            },
+            {
+              "name": "Designer N",
+              "usageCount": 2
+            },
+            {
+              "name": "Designer O",
+              "usageCount": 1
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Type",
+          "dbColumnName": "type_id",
+          "lookupTableName": "designed_interiors_type",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Children's Room",
+              "usageCount": 1937
+            },
+            {
+              "name": "Bedroom",
+              "usageCount": 32
+            },
+            {
+              "name": "Living Room",
+              "usageCount": 24
+            },
+            {
+              "name": "Office",
+              "usageCount": 19
+            },
+            {
+              "name": "Bathroom",
+              "usageCount": 14
+            },
+            {
+              "name": "Entryway",
+              "usageCount": 10
+            },
+            {
+              "name": "Living Room",
+              "usageCount": 10
+            },
+            {
+              "name": "Kitchen",
+              "usageCount": 8
+            },
+            {
+              "name": "Hallway",
+              "usageCount": 3
+            },
+            {
+              "name": "House",
+              "usageCount": 2
+            },
+            {
+              "name": "Walk-in Closet",
+              "usageCount": 2
+            },
+            {
+              "name": "Space Division",
+              "usageCount": 1
+            },
+            {
+              "name": "Living Room with Kitchenette",
+              "usageCount": 1
+            },
+            {
+              "name": "Laundry Room",
+              "usageCount": 1
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Airtable Export",
+          "dbColumnName": "airtable_export_id",
+          "lookupTableName": "designed_interiors_airtable_export",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Exported",
+              "usageCount": 1635
+            },
+            {
+              "name": "To Export",
+              "usageCount": 5
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Package (Product)",
+          "dbColumnName": "package_product_id",
+          "lookupTableName": "designed_interiors_package_product",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "PREMIUM",
+              "usageCount": 1131
+            },
+            {
+              "name": "PREMIUM+",
+              "usageCount": 363
+            },
+            {
+              "name": "ONE",
+              "usageCount": 277
+            },
+            {
+              "name": "GO",
+              "usageCount": 120
+            },
+            {
+              "name": "OTHER",
+              "usageCount": 83
+            },
+            {
+              "name": "SMART",
+              "usageCount": 47
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Delivered",
+          "dbColumnName": "delivered_id",
+          "lookupTableName": "designed_interiors_delivered",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Yes",
+              "usageCount": 1950
+            },
+            {
+              "name": "Cancelled",
+              "usageCount": 33
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Room Completion",
+          "dbColumnName": "room_completion_id",
+          "lookupTableName": "designed_interiors_room_completion",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Completed",
+              "usageCount": 138
+            },
+            {
+              "name": "In Progress",
+              "usageCount": 120
+            },
+            {
+              "name": "Will be Implemented",
+              "usageCount": 72
+            },
+            {
+              "name": "Not Completed",
+              "usageCount": 16
+            },
+            {
+              "name": "No Info",
+              "usageCount": 4
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Building Type",
+          "dbColumnName": "building_type_id",
+          "lookupTableName": "designed_interiors_building_type",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "House",
+              "usageCount": 1277
+            },
+            {
+              "name": "Apartment",
+              "usageCount": 693
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Room Condition",
+          "dbColumnName": "room_condition_id",
+          "lookupTableName": "designed_interiors_room_condition",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Renovation",
+              "usageCount": 1404
+            },
+            {
+              "name": "Developer Finish",
+              "usageCount": 399
+            },
+            {
+              "name": "Shell Stage",
+              "usageCount": 167
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "GSheets export",
+          "dbColumnName": "gsheets_export_id",
+          "lookupTableName": "designed_interiors_gsheets_export",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Exported",
+              "usageCount": 1600
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Contact Status",
+          "dbColumnName": "contact_status_id",
+          "lookupTableName": "designed_interiors_contact_status",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "After Call \u2013 next steps",
+              "usageCount": 420
+            },
+            {
+              "name": "After Call \u2013 nothing further",
+              "usageCount": 140
+            },
+            {
+              "name": "Call Attempt",
+              "usageCount": 37
+            },
+            {
+              "name": "To Contact",
+              "usageCount": 9
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Promo Campaigns",
+          "dbColumnName": "promo_campaigns",
+          "lookupTableName": "designed_interiors_promo_campaigns",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "Partner1 221212",
+              "usageCount": 1
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Promo Campaign",
+          "dbColumnName": "promo_campaign",
+          "lookupTableName": "designed_interiors_promo_campaign",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "Partner2 04/2023",
+              "usageCount": 30
+            },
+            {
+              "name": "Partner1 04/2024",
+              "usageCount": 20
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Contact Person",
+          "dbColumnName": "contact_person_id",
+          "lookupTableName": "designed_interiors_contact_person",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Designer R",
+              "usageCount": 19
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Tags",
+          "dbColumnName": "tags",
+          "lookupTableName": "designed_interiors_tags",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "BF 2023 (to contact)",
+              "usageCount": 57
+            },
+            {
+              "name": "BF 2024",
+              "usageCount": 56
+            },
+            {
+              "name": "BF 2023 (mail)",
+              "usageCount": 35
+            },
+            {
+              "name": "Partner2 03/2024",
+              "usageCount": 14
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Email Sent",
+          "dbColumnName": "email_sent_id",
+          "lookupTableName": "designed_interiors_email_sent",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Sent",
+              "usageCount": 33
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Automated Emails",
+          "dbColumnName": "automated_emails",
+          "lookupTableName": "designed_interiors_automated_emails",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "List Expiry \u2013 last day",
+              "usageCount": 473
+            },
+            {
+              "name": "List Expiry \u2013 5 days",
+              "usageCount": 458
+            },
+            {
+              "name": "Free Shipping \u2013 last day",
+              "usageCount": 413
+            },
+            {
+              "name": "Free Shipping \u2013 2 days",
+              "usageCount": 392
+            },
+            {
+              "name": "DO NOT SEND",
+              "usageCount": 78
+            },
+            {
+              "name": "",
+              "usageCount": 19
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Contact Status (new)",
+          "dbColumnName": "contact_status_new_id",
+          "lookupTableName": "designed_interiors_contact_status_new",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Project Completed \u2013 most ordered with us",
+              "usageCount": 289
+            },
+            {
+              "name": "Won't Order",
+              "usageCount": 119
+            },
+            {
+              "name": "No Contact",
+              "usageCount": 101
+            },
+            {
+              "name": "Order within a month",
+              "usageCount": 50
+            },
+            {
+              "name": "Order later (renovation/build in progress)",
+              "usageCount": 38
+            },
+            {
+              "name": "Order within 2 months",
+              "usageCount": 12
+            },
+            {
+              "name": "Finalizing Details",
+              "usageCount": 5
+            }
+          ]
+        }
+      ],
+      "skip": [
+        {
+          "airtableName": "Room No. (autonumber)",
+          "airtableType": "autoNumber",
+          "reason": "use DB serial"
+        },
+        {
+          "airtableName": "Contact Date (auto)",
+          "airtableType": "lastModifiedTime",
+          "reason": "system field"
+        },
+        {
+          "airtableName": "Modified At (Airtable Export)",
+          "airtableType": "lastModifiedTime",
+          "reason": "system field"
+        }
+      ],
+      "computedFields": [
+        {
+          "airtableName": "Room Number",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Order Number EXP",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "WordPress Current Project Number",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Order Date",
+          "airtableType": "multipleLookupValues",
+          "resultType": "date",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Children Count",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Customer",
+          "airtableType": "multipleLookupValues",
+          "resultType": "multipleRecordLinks",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Package",
+          "airtableType": "multipleLookupValues",
+          "resultType": "multipleRecordLinks",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Shopping List (net)",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Potential Commissions Value",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Products Share (net)",
+          "airtableType": "formula",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions to Total Purchases",
+          "airtableType": "formula",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Purchase Month",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid Commissions",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Likely Revenue >90%",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Completion Status (by paid invoices)",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions Completed (%)",
+          "airtableType": "formula",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Region",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "City",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions Paid to Designer",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Interior_No",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid Commissions Amount",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions Paid/To Pay (net)",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Phone",
+          "airtableType": "multipleLookupValues",
+          "resultType": "phoneNumber",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Email",
+          "airtableType": "multipleLookupValues",
+          "resultType": "email",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Delivery Month",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Contacts Count (all)",
+          "airtableType": "count",
+          "resultType": null,
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions to Allocate",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "FB Review",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Carpenter",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Express",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Interior_No_wordpress_current",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions for Designer",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Completed Orders (net)",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Free Shipping",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "First Purchase Date",
+          "airtableType": "rollup",
+          "resultType": "date",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Discount",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid Commissions (net)",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Shopping List (net)",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Potential Commissions (net)",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions Completed Net (%)",
+          "airtableType": "formula",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Completed Orders Net (%)",
+          "airtableType": "formula",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Completion Started (by paid invoices)",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Free Shipping Ends in x Days",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Package Price",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Shopping List Expiry End",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Customer EXP",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Purchase Year",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Delivery Year",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Delivery Date (for Rollup)",
+          "airtableType": "formula",
+          "resultType": "date",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Delivery Week",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Planned Budget (numeric)",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        }
+      ]
+    },
+    {
+      "airtableId": "tbl94C771ANGtmgxz",
+      "airtableName": "Commissions",
+      "dbTableName": "commissions",
+      "recordCount": 31898,
+      "importOrder": 3,
+      "columns": [
+        {
+          "airtableName": "Invoice No",
+          "dbColumnName": "invoice_no",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 24
+          }
+        },
+        {
+          "airtableName": "Commission Invoice Date",
+          "dbColumnName": "commission_invoice_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Designer Settlement Date",
+          "dbColumnName": "designer_settlement_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Order Amount",
+          "dbColumnName": "order_amount",
+          "airtableType": "currency",
+          "pgType": "numeric(12,2)",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 0,
+            "max": 41056,
+            "precision": 21,
+            "scale": 16
+          }
+        },
+        {
+          "airtableName": "SKU",
+          "dbColumnName": "sku",
+          "airtableType": "singleLineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 360
+          }
+        },
+        {
+          "airtableName": "Theoretical Commission (gross)",
+          "dbColumnName": "theoretical_commission_gross",
+          "airtableType": "currency",
+          "pgType": "numeric(12,2)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 0,
+            "max": 7250,
+            "precision": 21,
+            "scale": 17
+          }
+        },
+        {
+          "airtableName": "Proforma",
+          "dbColumnName": "proforma",
+          "airtableType": "multilineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        {
+          "airtableName": "Payment Date",
+          "dbColumnName": "payment_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        },
+        {
+          "airtableName": "Notes",
+          "dbColumnName": "notes",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 76
+          }
+        },
+        {
+          "airtableName": "Promo Email Sent",
+          "dbColumnName": "promo_email_sent",
+          "airtableType": "checkbox",
+          "pgType": "boolean",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "boolean"
+          },
+          "default": "false"
+        },
+        {
+          "airtableName": "Field 43",
+          "dbColumnName": "field_43",
+          "airtableType": "singleLineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": null
+        }
+      ],
+      "relations": [
+        {
+          "airtableFieldName": "Rooms",
+          "dbColumnName": "rooms_id",
+          "type": "manyToOne",
+          "targetTable": "designed_interiors",
+          "targetAirtableName": "Designed Interiors"
+        }
+      ],
+      "lookupTables": [
+        {
+          "airtableFieldName": "Paid",
+          "dbColumnName": "paid_id",
+          "lookupTableName": "commissions_paid",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "No",
+              "usageCount": 18098
+            },
+            {
+              "name": "Yes",
+              "usageCount": 13656
+            },
+            {
+              "name": "To Settle (order confirmed)",
+              "usageCount": 72
+            },
+            {
+              "name": "Customer Return",
+              "usageCount": 28
+            },
+            {
+              "name": "N/A",
+              "usageCount": 9
+            },
+            {
+              "name": "Invoice Issued",
+              "usageCount": 5
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Designer Settlement Status",
+          "dbColumnName": "designer_settlement_status_id",
+          "lookupTableName": "commissions_designer_settlement_status",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Settled",
+              "usageCount": 13074
+            },
+            {
+              "name": "To Settle",
+              "usageCount": 66
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Order Status",
+          "dbColumnName": "order_status_id",
+          "lookupTableName": "commissions_order_status",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Ordered by Us",
+              "usageCount": 13618
+            },
+            {
+              "name": "Not Ordered (won't be)",
+              "usageCount": 136
+            },
+            {
+              "name": "Not Ordered (yet)",
+              "usageCount": 131
+            },
+            {
+              "name": "Ordered Directly",
+              "usageCount": 126
+            },
+            {
+              "name": "Ordered Elsewhere",
+              "usageCount": 36
+            },
+            {
+              "name": "Unknown",
+              "usageCount": 35
+            },
+            {
+              "name": "Different Product Ordered",
+              "usageCount": 32
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Issued By",
+          "dbColumnName": "issued_by_id",
+          "lookupTableName": "commissions_issued_by",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Designer P",
+              "usageCount": 13119
+            },
+            {
+              "name": "Designer Q",
+              "usageCount": 436
+            },
+            {
+              "name": "Direct",
+              "usageCount": 24
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Order Method",
+          "dbColumnName": "order_method_id",
+          "lookupTableName": "commissions_order_method",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Shopping@Studio",
+              "usageCount": 28226
+            },
+            {
+              "name": "Proforma",
+              "usageCount": 3604
+            },
+            {
+              "name": "Studio Store",
+              "usageCount": 11
+            },
+            {
+              "name": "Direct",
+              "usageCount": 5
+            }
+          ]
+        }
+      ],
+      "skip": [
+        {
+          "airtableName": "Modified At",
+          "airtableType": "lastModifiedTime",
+          "reason": "system field"
+        }
+      ],
+      "computedFields": [
+        {
+          "airtableName": "Name",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Designer",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Designer Settlement Amount",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Paid",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Designer Settlement Amount (minus Designer N)",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Customer",
+          "airtableType": "multipleLookupValues",
+          "resultType": "multipleRecordLinks",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Invoice Month",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Paid/To Pay",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Room Completion Status",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Project Order Month",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commissions Paid to Designer",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Purchases Completion",
+          "airtableType": "multipleLookupValues",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "City",
+          "airtableType": "multipleLookupValues",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Current Month",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid Commissions Amount (net)",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Invoice Year",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Order Amount EXP",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Commission Paid EXP",
+          "airtableType": "formula",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Carpenter",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Shopping List Value",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Email",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Delivery Month",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Package",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Tags",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Project Delivery Date",
+          "airtableType": "rollup",
+          "resultType": "date",
+          "recreateAs": "app-logic"
+        }
+      ]
+    },
+    {
+      "airtableId": "tbll0HM2n4QeRaDjd",
+      "airtableName": "Stores",
+      "dbTableName": "stores",
+      "recordCount": 137,
+      "importOrder": 4,
+      "columns": [
+        {
+          "airtableName": "Name",
+          "dbColumnName": "name",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": true,
+          "validation": {
+            "type": "string",
+            "maxLength": 32
+          }
+        },
+        {
+          "airtableName": "MainCompany",
+          "dbColumnName": "main_company",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 32
+          }
+        },
+        {
+          "airtableName": "Commission Rate",
+          "dbColumnName": "commission_rate",
+          "airtableType": "multilineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 55
+          }
+        },
+        {
+          "airtableName": "Delivery Cost",
+          "dbColumnName": "delivery_cost",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 184
+          }
+        },
+        {
+          "airtableName": "Delivery Time",
+          "dbColumnName": "delivery_time",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 232
+          }
+        },
+        {
+          "airtableName": "Company",
+          "dbColumnName": "company",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(100)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 63
+          }
+        },
+        {
+          "airtableName": "Internal Notes",
+          "dbColumnName": "internal_notes",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 918
+          }
+        },
+        {
+          "airtableName": "Bank Account",
+          "dbColumnName": "bank_account",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 33
+          }
+        },
+        {
+          "airtableName": "Address",
+          "dbColumnName": "address",
+          "airtableType": "multilineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 134
+          }
+        },
+        {
+          "airtableName": "NIP",
+          "dbColumnName": "nip",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 13
+          }
+        },
+        {
+          "airtableName": "Offer Details",
+          "dbColumnName": "offer_details",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 142
+          }
+        },
+        {
+          "airtableName": "Address on studio.com",
+          "dbColumnName": "address_on_studio_com",
+          "airtableType": "url",
+          "pgType": "varchar(50)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 44
+          }
+        },
+        {
+          "airtableName": "Manufacturer/Store URL",
+          "dbColumnName": "manufacturer_store_url",
+          "airtableType": "url",
+          "pgType": "varchar(200)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 192
+          }
+        },
+        {
+          "airtableName": "Visible to External Designers",
+          "dbColumnName": "visible_to_external_designers",
+          "airtableType": "checkbox",
+          "pgType": "boolean",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "boolean"
+          },
+          "default": "false"
+        },
+        {
+          "airtableName": "Orders \u2013 Website",
+          "dbColumnName": "orders_website",
+          "airtableType": "url",
+          "pgType": "varchar(100)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        {
+          "airtableName": "Orders \u2013 Login Credentials",
+          "dbColumnName": "orders_login_credentials",
+          "airtableType": "multilineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 294
+          }
+        },
+        {
+          "airtableName": "Store Products - Data",
+          "dbColumnName": "store_products_data",
+          "airtableType": "multilineText",
+          "pgType": "text",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 264
+          }
+        }
+      ],
+      "relations": [],
+      "lookupTables": [
+        {
+          "airtableFieldName": "Partnership Type",
+          "dbColumnName": "partnership_type_id",
+          "lookupTableName": "stores_partnership_type",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Dropshipping",
+              "usageCount": 76
+            },
+            {
+              "name": "Reseller",
+              "usageCount": 58
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Partnership Status",
+          "dbColumnName": "partnership_status_id",
+          "lookupTableName": "stores_partnership_status",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Active",
+              "usageCount": 85
+            },
+            {
+              "name": "Suspended",
+              "usageCount": 25
+            },
+            {
+              "name": "Occasional",
+              "usageCount": 25
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Billing Method/Invoice",
+          "dbColumnName": "billing_method_invoice_id",
+          "lookupTableName": "stores_billing_method_invoice",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Monthly",
+              "usageCount": 72
+            },
+            {
+              "name": "Per Order",
+              "usageCount": 38
+            },
+            {
+              "name": "Commission-based",
+              "usageCount": 2
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Contract Sending Status",
+          "dbColumnName": "contract_sending_status_id",
+          "lookupTableName": "stores_contract_sending_status",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Signed",
+              "usageCount": 59
+            },
+            {
+              "name": "Sent",
+              "usageCount": 8
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Order Method S@S",
+          "dbColumnName": "order_method_s_s_id",
+          "lookupTableName": "stores_order_method_s_s",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Email",
+              "usageCount": 43
+            },
+            {
+              "name": "Via Store",
+              "usageCount": 20
+            },
+            {
+              "name": "Email after quote",
+              "usageCount": 12
+            },
+            {
+              "name": "Via B2B Platform",
+              "usageCount": 11
+            },
+            {
+              "name": "customer discount code",
+              "usageCount": 2
+            },
+            {
+              "name": "order form",
+              "usageCount": 2
+            },
+            {
+              "name": "proforma",
+              "usageCount": 1
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Offered Product Categories",
+          "dbColumnName": "offered_product_categories",
+          "lookupTableName": "stores_offered_product_categories",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "Beds",
+              "usageCount": 23
+            },
+            {
+              "name": "Desks",
+              "usageCount": 20
+            },
+            {
+              "name": "Shelving Units",
+              "usageCount": 19
+            },
+            {
+              "name": "Shelves",
+              "usageCount": 19
+            },
+            {
+              "name": "Dressers",
+              "usageCount": 17
+            },
+            {
+              "name": "Wardrobes",
+              "usageCount": 17
+            },
+            {
+              "name": "Decorations",
+              "usageCount": 14
+            },
+            {
+              "name": "Accessories",
+              "usageCount": 13
+            },
+            {
+              "name": "Poufs and Seats",
+              "usageCount": 11
+            },
+            {
+              "name": "Small Tables",
+              "usageCount": 11
+            },
+            {
+              "name": "Wallpapers",
+              "usageCount": 11
+            },
+            {
+              "name": "Lighting",
+              "usageCount": 10
+            },
+            {
+              "name": "Bunk Beds",
+              "usageCount": 10
+            },
+            {
+              "name": "Nightstands",
+              "usageCount": 10
+            },
+            {
+              "name": "Chairs Armchairs and Small Tables",
+              "usageCount": 10
+            },
+            {
+              "name": "Stickers",
+              "usageCount": 9
+            },
+            {
+              "name": "Lamps - ceiling",
+              "usageCount": 8
+            },
+            {
+              "name": "Loft Beds",
+              "usageCount": 8
+            },
+            {
+              "name": "Storage Containers",
+              "usageCount": 7
+            },
+            {
+              "name": "Wall Panels",
+              "usageCount": 7
+            },
+            {
+              "name": "Lamps - Wall Sconces",
+              "usageCount": 6
+            },
+            {
+              "name": "Other",
+              "usageCount": 6
+            },
+            {
+              "name": "Extendable Beds",
+              "usageCount": 6
+            },
+            {
+              "name": "Chests",
+              "usageCount": 6
+            },
+            {
+              "name": "Rugs",
+              "usageCount": 5
+            },
+            {
+              "name": "Upholstered Beds",
+              "usageCount": 4
+            },
+            {
+              "name": "Handles",
+              "usageCount": 4
+            },
+            {
+              "name": "Climbing Walls",
+              "usageCount": 4
+            },
+            {
+              "name": "Ladders and Accessories",
+              "usageCount": 3
+            },
+            {
+              "name": "Boards",
+              "usageCount": 3
+            },
+            {
+              "name": "Desk Chairs",
+              "usageCount": 3
+            },
+            {
+              "name": "Decorative Lamps",
+              "usageCount": 3
+            },
+            {
+              "name": "Mattresses",
+              "usageCount": 2
+            },
+            {
+              "name": "LED Signs",
+              "usageCount": 1
+            },
+            {
+              "name": "Custom Blinds",
+              "usageCount": 1
+            },
+            {
+              "name": "Plant Stands",
+              "usageCount": 1
+            }
+          ]
+        }
+      ],
+      "skip": [],
+      "computedFields": [
+        {
+          "airtableName": "Theoretical Commissions",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid/To-Pay Commissions",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Orders Value",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid Orders",
+          "airtableType": "rollup",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Paid Commissions %",
+          "airtableType": "formula",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Completed Orders % (by value)",
+          "airtableType": "formula",
+          "resultType": "percent",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Projects",
+          "airtableType": "rollup",
+          "resultType": "number",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Average Order Value",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Completed Orders",
+          "airtableType": "count",
+          "resultType": null,
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Avg Order Value for Completed",
+          "airtableType": "formula",
+          "resultType": "currency",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Website URL",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        }
+      ]
+    },
+    {
+      "airtableId": "tbl4oUbOaDN7sbizJ",
+      "airtableName": "Service Packages",
+      "dbTableName": "service_packages",
+      "recordCount": 14,
+      "importOrder": 5,
+      "columns": [
+        {
+          "airtableName": "Name",
+          "dbColumnName": "name",
+          "airtableType": "singleLineText",
+          "pgType": "varchar(50)",
+          "nullable": false,
+          "isPrimary": true,
+          "validation": {
+            "type": "string",
+            "maxLength": 19
+          }
+        },
+        {
+          "airtableName": "Price",
+          "dbColumnName": "price",
+          "airtableType": "currency",
+          "pgType": "numeric(12,2)",
+          "nullable": true,
+          "isPrimary": false,
+          "validation": {
+            "type": "number",
+            "min": 199,
+            "max": 2949
+          }
+        }
+      ],
+      "relations": [],
+      "lookupTables": [],
+      "skip": [],
+      "computedFields": [
+        {
+          "airtableName": "Sold Packages Value",
+          "airtableType": "rollup",
+          "resultType": null,
+          "recreateAs": "app-logic"
+        }
+      ]
+    },
+    {
+      "airtableId": "tblG15dxwxRdXaXH9",
+      "airtableName": "Contacts",
+      "dbTableName": "contacts",
+      "recordCount": 276,
+      "importOrder": 6,
+      "columns": [
+        {
+          "airtableName": "Notes",
+          "dbColumnName": "notes",
+          "airtableType": "richText",
+          "pgType": "text",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "string",
+            "maxLength": 970
+          }
+        },
+        {
+          "airtableName": "Contact Date",
+          "dbColumnName": "contact_date",
+          "airtableType": "date",
+          "pgType": "timestamp",
+          "nullable": false,
+          "isPrimary": false,
+          "validation": {
+            "type": "date"
+          }
+        }
+      ],
+      "relations": [],
+      "lookupTables": [
+        {
+          "airtableFieldName": "Status",
+          "dbColumnName": "status_id",
+          "lookupTableName": "contacts_status",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Done",
+              "usageCount": 218
+            },
+            {
+              "name": "In Progress (waiting)",
+              "usageCount": 33
+            },
+            {
+              "name": "To Do",
+              "usageCount": 25
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Contact Type",
+          "dbColumnName": "contact_type_id",
+          "lookupTableName": "contacts_contact_type",
+          "isMultiple": false,
+          "values": [
+            {
+              "name": "Phone \u260e\ufe0f",
+              "usageCount": 168
+            },
+            {
+              "name": "Task \u2705",
+              "usageCount": 67
+            },
+            {
+              "name": "Email \u2709\ufe0f",
+              "usageCount": 22
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Assigned To",
+          "dbColumnName": "assigned_to",
+          "lookupTableName": "contacts_assigned_to",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "Designer N",
+              "usageCount": 205
+            },
+            {
+              "name": "Designer P",
+              "usageCount": 70
+            }
+          ]
+        },
+        {
+          "airtableFieldName": "Topics",
+          "dbColumnName": "topics",
+          "lookupTableName": "contacts_topics",
+          "isMultiple": true,
+          "values": [
+            {
+              "name": "Partnership Review",
+              "usageCount": 80
+            },
+            {
+              "name": "FB Review",
+              "usageCount": 40
+            },
+            {
+              "name": "Post-delivery \u2013 orders",
+              "usageCount": 31
+            },
+            {
+              "name": "Proforma Updates",
+              "usageCount": 25
+            },
+            {
+              "name": "Order Verification",
+              "usageCount": 21
+            },
+            {
+              "name": "Photo Request",
+              "usageCount": 2
+            }
+          ]
+        }
+      ],
+      "skip": [
+        {
+          "airtableName": "Last Modified",
+          "airtableType": "lastModifiedTime",
+          "reason": "system field"
+        }
+      ],
+      "computedFields": [
+        {
+          "airtableName": "Contact",
+          "airtableType": "formula",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Customer",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Phone",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        },
+        {
+          "airtableName": "Email",
+          "airtableType": "rollup",
+          "resultType": "singleLineText",
+          "recreateAs": "app-logic"
+        }
+      ]
+    }
+  ],
+  "junctionTables": [
+    {
+      "dbTableName": "customers_to_customer_orders",
+      "sourceTable": "customers",
+      "targetTable": "customer_orders",
+      "sourceColumn": "customers_id",
+      "targetColumn": "customer_orders_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "customer_orders_to_service_packages",
+      "sourceTable": "customer_orders",
+      "targetTable": "service_packages",
+      "sourceColumn": "customer_orders_id",
+      "targetColumn": "service_packages_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "customer_orders_to_designed_interiors",
+      "sourceTable": "customer_orders",
+      "targetTable": "designed_interiors",
+      "sourceColumn": "customer_orders_id",
+      "targetColumn": "designed_interiors_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "customer_orders_mailing_jn",
+      "sourceTable": "customer_orders",
+      "targetTable": "customer_orders_mailing",
+      "sourceColumn": "customer_orders_id",
+      "targetColumn": "customer_orders_mailing_id",
+      "reason": "multipleSelects"
+    },
+    {
+      "dbTableName": "designed_interiors_to_commissions",
+      "sourceTable": "designed_interiors",
+      "targetTable": "commissions",
+      "sourceColumn": "designed_interiors_id",
+      "targetColumn": "commissions_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "designed_interiors_to_contacts",
+      "sourceTable": "designed_interiors",
+      "targetTable": "contacts",
+      "sourceColumn": "designed_interiors_id",
+      "targetColumn": "contacts_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "designed_interiors_promo_campaigns_jn",
+      "sourceTable": "designed_interiors",
+      "targetTable": "designed_interiors_promo_campaigns",
+      "sourceColumn": "designed_interiors_id",
+      "targetColumn": "designed_interiors_promo_campaigns_id",
+      "reason": "multipleSelects"
+    },
+    {
+      "dbTableName": "designed_interiors_promo_campaign_jn",
+      "sourceTable": "designed_interiors",
+      "targetTable": "designed_interiors_promo_campaign",
+      "sourceColumn": "designed_interiors_id",
+      "targetColumn": "designed_interiors_promo_campaign_id",
+      "reason": "multipleSelects"
+    },
+    {
+      "dbTableName": "designed_interiors_tags_jn",
+      "sourceTable": "designed_interiors",
+      "targetTable": "designed_interiors_tags",
+      "sourceColumn": "designed_interiors_id",
+      "targetColumn": "designed_interiors_tags_id",
+      "reason": "multipleSelects"
+    },
+    {
+      "dbTableName": "designed_interiors_automated_emails_jn",
+      "sourceTable": "designed_interiors",
+      "targetTable": "designed_interiors_automated_emails",
+      "sourceColumn": "designed_interiors_id",
+      "targetColumn": "designed_interiors_automated_emails_id",
+      "reason": "multipleSelects"
+    },
+    {
+      "dbTableName": "commissions_to_stores",
+      "sourceTable": "commissions",
+      "targetTable": "stores",
+      "sourceColumn": "commissions_id",
+      "targetColumn": "stores_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "stores_to_commissions",
+      "sourceTable": "stores",
+      "targetTable": "commissions",
+      "sourceColumn": "stores_id",
+      "targetColumn": "commissions_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "stores_offered_product_categories_jn",
+      "sourceTable": "stores",
+      "targetTable": "stores_offered_product_categories",
+      "sourceColumn": "stores_id",
+      "targetColumn": "stores_offered_product_categories_id",
+      "reason": "multipleSelects"
+    },
+    {
+      "dbTableName": "service_packages_to_customer_orders",
+      "sourceTable": "service_packages",
+      "targetTable": "customer_orders",
+      "sourceColumn": "service_packages_id",
+      "targetColumn": "customer_orders_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "contacts_to_designed_interiors",
+      "sourceTable": "contacts",
+      "targetTable": "designed_interiors",
+      "sourceColumn": "contacts_id",
+      "targetColumn": "designed_interiors_id",
+      "reason": "manyToMany"
+    },
+    {
+      "dbTableName": "contacts_assigned_to_jn",
+      "sourceTable": "contacts",
+      "targetTable": "contacts_assigned_to",
+      "sourceColumn": "contacts_id",
+      "targetColumn": "contacts_assigned_to_id",
+      "reason": "multipleSelects"
+    },
+    {
+      "dbTableName": "contacts_topics_jn",
+      "sourceTable": "contacts",
+      "targetTable": "contacts_topics",
+      "sourceColumn": "contacts_id",
+      "targetColumn": "contacts_topics_id",
+      "reason": "multipleSelects"
+    }
+  ],
+  "importOrder": [
+    "customers",
+    "customer_orders",
+    "designed_interiors",
+    "commissions",
+    "stores",
+    "service_packages",
+    "contacts"
+  ]
+}
